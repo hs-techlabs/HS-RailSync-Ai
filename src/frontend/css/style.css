@@ -2180,3 +2180,379 @@ body {
     border-color: var(--border-medium);
 }
 
+
+/* ==========================================================================
+   LIVE SIMULATOR: FIELD REPORT REVIEW, ATTACHMENTS, CLOCK, TOASTS, EXEC BOARD
+   Built from the existing design tokens so it stays consistent with the app.
+   ========================================================================== */
+
+/* --- Additional lifecycle status badges (extend .status-badge) ----------- */
+.status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.status-cancelled {
+    background: #fee2e2;
+    color: #7f1d1d;
+    border: 1px solid #fca5a5;
+}
+
+.status-inprogress {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+.status-completed {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+/* --- Field report review queue ------------------------------------------ */
+.review-queue {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 640px;
+    overflow-y: auto;
+}
+
+.review-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    background: #ffffff;
+}
+
+.review-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.review-card-id {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.review-card-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.review-card-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    font-family: var(--font-mono);
+}
+
+.review-card-desc {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.review-card-attachments {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.attachment-thumb {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.attachment-thumb:hover {
+    transform: scale(1.06);
+}
+
+.attachment-thumb-pdf {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-surface-subtle);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border-color);
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+.review-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-approve-demand,
+.btn-reject-demand {
+    flex: 1;
+    padding: 7px 10px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btn-approve-demand { background: var(--color-emerald); }
+.btn-approve-demand:hover { background: #047857; }
+.btn-reject-demand { background: var(--color-crimson); }
+.btn-reject-demand:hover { background: #b91c1c; }
+
+.btn-approve-demand:disabled,
+.btn-reject-demand:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.review-queue-empty {
+    text-align: center;
+    padding: 30px 12px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+/* --- Recently reviewed history ------------------------------------------ */
+.review-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.review-history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: #ffffff;
+}
+
+.review-history-main { flex: 1; }
+
+.review-history-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.review-history-note {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* --- Accelerated clock badge -------------------------------------------- */
+.sim-clock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #1e293b;
+    font-feature-settings: "tnum";
+}
+
+.sim-rate-tag {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.4px;
+}
+
+/* --- Notification toasts ------------------------------------------------- */
+.toast-stack {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+    max-width: 380px;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 12px;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--text-muted);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.14);
+    pointer-events: auto;
+    animation: toast-in 0.28s ease;
+}
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.toast-leaving {
+    opacity: 0;
+    transform: translateX(24px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.toast-info    { border-left-color: var(--color-blue, #2563eb); }
+.toast-success { border-left-color: var(--color-emerald); }
+.toast-warning { border-left-color: #d97706; }
+.toast-danger  { border-left-color: var(--color-crimson); }
+
+.toast-icon { font-size: 1rem; line-height: 1.2; }
+
+.toast-body { flex: 1; min-width: 0; }
+
+.toast-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary, #0f172a);
+    margin-bottom: 2px;
+}
+
+.toast-message {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0 2px;
+}
+
+.toast-close:hover { color: var(--color-crimson); }
+
+/* --- OCC live block execution board -------------------------------------- */
+.exec-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+    gap: 12px;
+}
+
+.exec-card {
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 11px 13px;
+    background: #ffffff;
+}
+
+.exec-card-scheduled   { border-left-color: #94a3b8; }
+.exec-card-inprogress  { border-left-color: var(--color-blue, #2563eb); }
+.exec-card-completed   { border-left-color: var(--color-emerald); }
+.exec-card-cancelled   { border-left-color: var(--color-crimson); }
+.exec-card-deferred    { border-left-color: #d97706; }
+
+.exec-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.exec-card-id {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.exec-card-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.exec-card-meta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+}
+
+.exec-progress-track {
+    height: 6px;
+    background: var(--bg-surface-subtle);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.exec-progress-fill {
+    height: 100%;
+    background: var(--color-blue, #2563eb);
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+.exec-progress-fill.is-complete { background: var(--color-emerald); }
+
+.exec-card-note {
+    font-size: 0.7rem;
+    color: var(--color-crimson);
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+.exec-board-empty {
+    text-align: center;
+    padding: 26px 12px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.exec-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.exec-summary-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface-subtle);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.exec-summary-chip strong {
+    font-family: var(--font-mono);
+    color: var(--text-primary, #0f172a);
+}

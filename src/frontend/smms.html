@@ -25,6 +25,7 @@
                 </div>
             </div>
             <div class="portal-header-actions">
+                <span class="sim-clock-badge" id="smms-sim-clock" title="Accelerated corridor clock">&#9201; --:--:--</span>
                 <span class="corridor-badge" style="background:#ecfdf5; border-color:#a7f3d0; color:#047857;">
                     <span class="pulse-dot" style="background:#047857;"></span>
                     <span>QUAD-ASPECT AUTO SIGNALLING</span>
@@ -38,117 +39,23 @@
 
         <!-- 2-Column Portal Grid -->
         <div class="portal-grid">
-            <!-- Left Panel: Issue Raiser -->
+            <!-- Left Panel: Worker Field Report Review Queue -->
             <div class="portal-card">
                 <div class="portal-card-header">
                     <h2>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                        Raise S&amp;T Disconnection Demand
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        S&amp;T Field Reports &mdash; Pending Officer Review
                     </h2>
-                    <span class="badge-val" id="smms-form-time" style="color:#047857;">120 Min Requested</span>
+                    <span class="badge-val" id="smms-review-count">0 Awaiting</span>
                 </div>
                 <div class="portal-card-body">
-                    <form id="smms-demand-form" onsubmit="submitSMMSDemand(event)">
-                        <div class="form-group">
-                            <label>S&amp;T Defect Classification / Asset Type</label>
-                            <select class="form-select" id="smms-defect-cat" required>
-                                <option value="Point Machine Sluggish Throw (>5.8s Pt-101A)">Point Machine Sluggish Throw (&gt;5.8s IRSEM Pt-101A)</option>
-                                <option value="Track Circuit Receiver Voltage Drop (<0.8V)">Track Circuit Receiver Voltage Drop (&lt;0.8V Shunt Failure Risk)</option>
-                                <option value="Axle Counter Telegram Sync Anomaly">Axle Counter Dual-Telegram Synchronization Anomaly</option>
-                                <option value="Multi-Aspect LED Signal Cluster Replacement">Multi-Aspect Colour Light Signal (MACLS) LED Replacement</option>
-                                <option value="Electronic Interlocking (EI) Relay Logic Overhaul">Electronic Interlocking (EI) Diagnostic Relay Overhaul</option>
-                            </select>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Section From</label>
-                                <select class="form-select" id="smms-sec-from" required>
-                                    <option value="ALJN" selected>ALJN (Aligarh)</option>
-                                    <option value="NDLS">NDLS (New Delhi)</option>
-                                    <option value="GZB">GZB (Ghaziabad)</option>
-                                    <option value="DER">DER (Dadri)</option>
-                                    <option value="KRJ">KRJ (Khurja)</option>
-                                    <option value="TDL">TDL (Tundla)</option>
-                                    <option value="FZD">FZD (Firozabad)</option>
-                                    <option value="ETW">ETW (Etawah)</option>
-                                    <option value="PHD">PHD (Phaphund)</option>
-                                    <option value="CNB">CNB (Kanpur)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Section To</label>
-                                <select class="form-select" id="smms-sec-to" required>
-                                    <option value="TDL" selected>TDL (Tundla)</option>
-                                    <option value="GZB">GZB (Ghaziabad)</option>
-                                    <option value="DER">DER (Dadri)</option>
-                                    <option value="KRJ">KRJ (Khurja)</option>
-                                    <option value="ALJN">ALJN (Aligarh)</option>
-                                    <option value="FZD">FZD (Firozabad)</option>
-                                    <option value="ETW">ETW (Etawah)</option>
-                                    <option value="PHD">PHD (Phaphund)</option>
-                                    <option value="CNB">CNB (Kanpur)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Track Line</label>
-                                <select class="form-select" id="smms-line" required>
-                                    <option value="DN" selected>DN Line (Down &ndash; to Kanpur)</option>
-                                    <option value="UP">UP Line (Up &ndash; to New Delhi)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Target Asset / Point ID</label>
-                                <input type="text" class="form-input" id="smms-asset-id" value="Pt-101A (Crossover Turnout)" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Testing Equipment</label>
-                                <select class="form-select" id="smms-machine" required>
-                                    <option value="SIGNAL_GANG" selected>S&amp;T Digital Megger &amp; Current Logger</option>
-                                    <option value="TRACK_CIRCUIT_KIT">AFTC Frequency Shunt Testing Kit</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Priority Tier</label>
-                                <select class="form-select" id="smms-priority" required>
-                                    <option value="CRITICAL" selected>CRITICAL (Signal Locking Failure)</option>
-                                    <option value="HIGH">HIGH (Intermittent Telegram Drop)</option>
-                                    <option value="MEDIUM">MEDIUM (Routine Preventive Check)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Assigned S&amp;T Technical Gang</label>
-                            <input type="text" class="form-input" id="smms-gang" value="Signal Gang B (4 Technicians - ALJN Division)" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Estimated Disconnection Duration (Minutes): <span id="smms-duration-lbl" style="color:#047857; font-family:var(--font-mono); font-weight:700;">120 min (2.0h)</span></label>
-                            <input type="range" min="45" max="240" step="15" value="120" style="width:100%; accent-color:#047857;" id="smms-duration" oninput="document.getElementById('smms-duration-lbl').innerText = this.value + ' min (' + (this.value/60).toFixed(1) + 'h)'; document.getElementById('smms-form-time').innerText = this.value + ' Min Requested';">
-                        </div>
-
-                        <div class="form-checkbox-row" style="background:#ecfdf5; border-color:#a7f3d0;">
-                            <input type="checkbox" id="smms-disconnection" checked disabled>
-                            <label for="smms-disconnection" style="color:#047857;">S&amp;T Disconnection Notice (Form S&amp;T/T-351): MANDATORY to Station Master</label>
-                        </div>
-
-                        <div style="display:flex; gap:8px; margin-bottom:14px;">
-                            <button type="button" class="btn-portal-back" style="flex:1; justify-content:center;" onclick="loadPresetSMMS('POINT_ALJN')">⚡ Preset: Point Pt-101A (ALJN-TDL)</button>
-                            <button type="button" class="btn-portal-back" style="flex:1; justify-content:center;" onclick="loadPresetSMMS('CIRCUIT_TDL')">⚡ Preset: Track Circuit (TDL)</button>
-                        </div>
-
-                        <button type="submit" class="btn-submit-demand btn-submit-smms" id="btn-smms-submit">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                            Submit S&amp;T Disconnection Demand to Central OCC
-                        </button>
-                    </form>
+                    <p style="font-size:0.74rem; color:var(--text-muted); margin:0 0 12px 0;">
+                        Submitted by signal maintainer gangs &amp; S&amp;T field technicians. Verify the attached site evidence, then approve to forward
+                        the requisition to the Central OCC (BDMS) desk for block sanction.
+                    </p>
+                    <div class="review-queue" id="smms-review-queue">
+                        <div class="review-queue-empty">Awaiting field reports from the corridor&hellip;</div>
+                    </div>
                 </div>
             </div>
 
@@ -190,6 +97,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Recently Reviewed Field Reports -->
+        <div class="portal-card" style="margin-top:18px;">
+            <div class="portal-card-header">
+                <h2>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Recently Reviewed S&amp;T Field Reports
+                </h2>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Last 15 decisions</span>
+            </div>
+            <div class="portal-card-body">
+                <div class="review-history-list" id="smms-review-history">
+                    <div class="review-queue-empty">No reports reviewed yet.</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Sanction Memo Modal View -->
@@ -205,6 +128,20 @@
         </div>
     </div>
 
+
+    <!-- Field Evidence Lightbox -->
+    <div class="modal-overlay" id="attachment-view-modal" style="display:none;">
+        <div class="modal-card" style="max-width:820px;">
+            <div class="modal-header">
+                <h3 id="attachment-modal-title">Field Evidence</h3>
+                <button class="modal-close" onclick="document.getElementById('attachment-view-modal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body" id="attachment-modal-body"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/sim_clock.js"></script>
+    <script src="/static/js/portal_review.js"></script>
     <script src="/static/js/smms_portal.js"></script>
 </body>
 </html>

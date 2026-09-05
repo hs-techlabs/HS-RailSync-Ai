@@ -11,6 +11,11 @@ import time
 import json
 import pandas as pd
 import numpy as np
+
+# Keep the background field-report generator asleep during tests - it would
+# otherwise append reports and advance block lifecycles underneath assertions.
+os.environ["RAILWAY_SIM_AUTOSTART"] = "0"
+
 from fastapi.testclient import TestClient
 
 # Ensure root directory is in python path
@@ -194,15 +199,15 @@ class TestSystemIntegration(unittest.TestCase):
         client.post("/api/demand/raise", json={
             "department": "ENGINEERING_TRACK",
             "defect_category": "Rail Flaw (USFD)",
-            "section_from": "ALJN",
-            "section_to": "TDL",
-            "line": "DN",
-            "km_start": 135.5,
-            "km_end": 137.0,
+            "section_from": "GZB",
+            "section_to": "DER",
+            "line": "UP",
+            "km_start": 28.5,
+            "km_end": 30.0,
             "machine_required": "CSM_TAMPING",
             "power_block_required": True,
             "disconnection_required": False,
-            "gang_crew": "Track Gang B",
+            "gang_crew": "Track Gang B (GZB Depot)",
             "duration_requested_min": 210,
             "priority": "CRITICAL"
         })
@@ -211,11 +216,11 @@ class TestSystemIntegration(unittest.TestCase):
         client.post("/api/demand/raise", json={
             "department": "TRACTION_DISTRIBUTION_OHE",
             "defect_category": "Contact Wire Wear",
-            "section_from": "ALJN",
-            "section_to": "TDL",
-            "line": "DN",
-            "km_start": 136.0,
-            "km_end": 137.0,
+            "section_from": "GZB",
+            "section_to": "DER",
+            "line": "UP",
+            "km_start": 29.0,
+            "km_end": 30.0,
             "machine_required": "TOWER_WAGON",
             "power_block_required": True,
             "disconnection_required": False,
@@ -228,11 +233,11 @@ class TestSystemIntegration(unittest.TestCase):
         client.post("/api/demand/raise", json={
             "department": "SIGNAL_AND_TELECOM",
             "defect_category": "Point Machine Sluggish",
-            "section_from": "ALJN",
-            "section_to": "TDL",
-            "line": "DN",
-            "km_start": 135.0,
-            "km_end": 136.0,
+            "section_from": "GZB",
+            "section_to": "DER",
+            "line": "UP",
+            "km_start": 28.0,
+            "km_end": 29.0,
             "machine_required": "SIGNAL_GANG",
             "power_block_required": False,
             "disconnection_required": True,
@@ -263,6 +268,19 @@ class TestSystemIntegration(unittest.TestCase):
             self.assertEqual(res_dept.status_code, 200)
             self.assertGreater(len(res_dept.json()["demands"]), 0)
             self.assertEqual(res_dept.json()["demands"][0]["status"], "APPROVED_SHADOW_BLOCK")
+
+        # 8. The sanction must be real: each demand's ID must appear in the
+        #    task list of the block it was assigned to, and the window must be
+        #    resolved to an absolute simulated datetime for the lifecycle engine.
+        blocks = {b["schedule_id"]: b for b in res_b.json()["updated_schedule"]["scheduled_blocks"]}
+        for d in res_b.json()["sanctioned_demands"]:
+            block = blocks.get(d["sanction_memo_id"])
+            self.assertIsNotNone(block, f"{d['demand_id']} points at a non-existent block")
+            self.assertIn(d["demand_id"], block["tasks"],
+                          f"{d['demand_id']} was not actually scheduled into {block['schedule_id']}")
+            self.assertIsNotNone(d["window_start_sim"])
+            self.assertIsNotNone(d["window_end_sim"])
+            self.assertIn(d["window_day_label"], ("TODAY", "TOMORROW"))
 
     def test_department_portal_pages(self):
         client = TestClient(app)

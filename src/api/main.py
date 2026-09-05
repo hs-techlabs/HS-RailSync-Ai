@@ -33,6 +33,10 @@ from src.optimizer.ortools_scheduler import ORToolsBlockScheduler
 from src.optimizer.multi_horizon import generate_monthly_strategic_plan, generate_weekly_tactical_plan
 from src.simulator.disruption_engine import DisruptionSimulator
 from src.ml_engine.predict import run_inference
+from src.simulator import sim_state, fault_generator, block_lifecycle
+from src.simulator.virtual_clock import (
+    sim_now, sim_now_iso, multiplier as clock_multiplier, resolve_window
+)
 
 app = FastAPI(
     title="Indian Railways AI Automatic Block Planning System",
@@ -53,10 +57,22 @@ frontend_dir = os.path.join(ROOT_DIR, "src", "frontend")
 if os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 
+# Field-evidence attachments (photos / inspection PDFs referenced by worker
+# reports). Nothing under data/ was web-servable before this.
+attachments_dir = os.path.join(ROOT_DIR, "data", "attachments")
+if os.path.exists(attachments_dir):
+    app.mount("/attachments", StaticFiles(directory=attachments_dir), name="attachments")
+
 # Instantiate engines lazily
 scheduler = ORToolsBlockScheduler()
 simulator = DisruptionSimulator()
 explainability_engine = None
+
+# Start the live field-report simulator on server boot. Tests set
+# RAILWAY_SIM_AUTOSTART=0 before importing this module so the daemon never
+# mutates state underneath an assertion.
+if os.environ.get("RAILWAY_SIM_AUTOSTART", "1") != "0":
+    fault_generator.start()
 
 
 def get_explainability_engine():
@@ -381,24 +397,13 @@ def serve_smms_portal():
     return HTMLResponse("<h1>Signal Maintenance Management System (SMMS) Portal</h1>")
 
 
-DEMANDS_FILE = os.path.join(ROOT_DIR, "data", "processed", "pending_demands.json")
+DEMANDS_FILE = sim_state.DEMANDS_FILE
 
-
-def _read_demands() -> list:
-    if os.path.exists(DEMANDS_FILE):
-        try:
-            with open(DEMANDS_FILE, "r") as f:
-                data = json.load(f)
-                return data.get("demands", [])
-        except Exception:
-            return []
-    return []
-
-
-def _save_demands(demands: list):
-    os.makedirs(os.path.dirname(DEMANDS_FILE), exist_ok=True)
-    with open(DEMANDS_FILE, "w") as f:
-        json.dump({"demands": demands}, f, indent=2)
+# Thin aliases over the shared, lock-guarded primitives in sim_state, so the API
+# handlers and the background simulator thread can never interleave a read and a
+# write on the same file.
+_read_demands = sim_state.read_demands
+_save_demands = sim_state.write_demands
 
 
 class DemandRequest(BaseModel):
@@ -418,64 +423,100 @@ class DemandRequest(BaseModel):
     description: str = ""
 
 
+# Machines that must never work near live 25 kV OHE without an isolation permit.
+# The dataset labels these CSM / TAMPING / BCM, so all three spellings are
+# covered here (CONTEXT.md section 6.6 safety precedence guardrail).
+POWER_BLOCK_MACHINES = {"BCM", "CSM", "TAMPING", "CSM_TAMPING"}
+
+
+def _create_pending_demand(department: str, defect_category: str, section_from: str,
+                           section_to: str, line: str, km_start: float, km_end: float,
+                           machine_required: str, power_block_required: bool,
+                           disconnection_required: bool, gang_crew: str,
+                           duration_requested_min: int, priority: str,
+                           description: str, asset_id: str = "") -> dict:
+    """
+    Builds and queues one OCC demand.
+
+    Single implementation shared by the manual /api/demand/raise endpoint and by
+    worker-report approval, so an approved field report produces exactly the same
+    record shape the old manual form did - which is why nothing downstream (the
+    bundling engine, the OCC console, the sanction memo generator) needed to
+    change.
+    """
+    with sim_state.demands_lock:
+        demands = sim_state.read_demands_unlocked()
+
+        dept_prefix = sim_state.DEPT_PREFIX.get(department, "DMD")
+        dept_label = sim_state.DEPT_LABEL.get(department, department)
+        demand_id = f"DMD-{dept_prefix}-{len(demands) + 101}"
+
+        # Auto-enforce safety rules
+        pwr = power_block_required
+        if department == "TRACTION_DISTRIBUTION_OHE" or machine_required in POWER_BLOCK_MACHINES:
+            pwr = True
+
+        disc = disconnection_required
+        if department == "SIGNAL_AND_TELECOM":
+            disc = True
+
+        new_demand = {
+            "demand_id": demand_id,
+            "department": department,
+            "department_label": dept_label,
+            "asset_id": asset_id,
+            "defect_category": defect_category,
+            "section_from": section_from.upper(),
+            "section_to": section_to.upper(),
+            "line": line.upper(),
+            "km_start": km_start,
+            "km_end": km_end if km_end > km_start else km_start + 1.0,
+            "machine_required": machine_required,
+            "power_block_required": pwr,
+            "disconnection_required": disc,
+            "gang_crew": gang_crew,
+            "duration_requested_min": duration_requested_min,
+            "priority": priority,
+            "description": description or f"{defect_category} on {section_from}-{section_to} ({line})",
+            "status": "PENDING_SANCTION",
+            "raised_at": pd.Timestamp.now().isoformat(),
+            "raised_at_sim": sim_now_iso(),
+            "sanctioned_window": None,
+            "sanction_memo_id": None,
+            "window_start_sim": None,
+            "window_end_sim": None,
+            "window_day_label": None
+        }
+
+        demands.append(new_demand)
+        sim_state.write_demands_unlocked(demands)
+
+    return new_demand
+
+
 @app.post("/api/demand/raise")
 def raise_demand(req: DemandRequest):
-    demands = _read_demands()
-
-    dept_prefix = {
-        "ENGINEERING_TRACK": "TMS",
-        "TRACTION_DISTRIBUTION_OHE": "TDMS",
-        "SIGNAL_AND_TELECOM": "SMMS"
-    }.get(req.department, "DMD")
-
-    dept_label = {
-        "ENGINEERING_TRACK": "Civil / Track (TMS)",
-        "TRACTION_DISTRIBUTION_OHE": "Electrical / OHE (TDMS)",
-        "SIGNAL_AND_TELECOM": "Signalling & Telecom (SMMS)"
-    }.get(req.department, req.department)
-
-    demand_id = f"DMD-{dept_prefix}-{len(demands) + 101}"
-
-    # Auto-enforce safety rules
-    pwr = req.power_block_required
-    if req.department == "TRACTION_DISTRIBUTION_OHE" or req.machine_required in ["BCM", "CSM_TAMPING"]:
-        pwr = True
-
-    disc = req.disconnection_required
-    if req.department == "SIGNAL_AND_TELECOM":
-        disc = True
-
-    now_iso = pd.Timestamp.now().isoformat()
-
-    new_demand = {
-        "demand_id": demand_id,
-        "department": req.department,
-        "department_label": dept_label,
-        "defect_category": req.defect_category,
-        "section_from": req.section_from.upper(),
-        "section_to": req.section_to.upper(),
-        "line": req.line.upper(),
-        "km_start": req.km_start,
-        "km_end": req.km_end if req.km_end > req.km_start else req.km_start + 1.0,
-        "machine_required": req.machine_required,
-        "power_block_required": pwr,
-        "disconnection_required": disc,
-        "gang_crew": req.gang_crew,
-        "duration_requested_min": req.duration_requested_min,
-        "priority": req.priority,
-        "description": req.description or f"{req.defect_category} on {req.section_from}-{req.section_to} ({req.line})",
-        "status": "PENDING_SANCTION",
-        "raised_at": now_iso,
-        "sanctioned_window": None,
-        "sanction_memo_id": None
-    }
-
-    demands.append(new_demand)
-    _save_demands(demands)
+    """Manual override path. No portal UI calls this any more, but it still works."""
+    new_demand = _create_pending_demand(
+        department=req.department,
+        defect_category=req.defect_category,
+        section_from=req.section_from,
+        section_to=req.section_to,
+        line=req.line,
+        km_start=req.km_start,
+        km_end=req.km_end,
+        machine_required=req.machine_required,
+        power_block_required=req.power_block_required,
+        disconnection_required=req.disconnection_required,
+        gang_crew=req.gang_crew,
+        duration_requested_min=req.duration_requested_min,
+        priority=req.priority,
+        description=req.description
+    )
 
     return {
         "status": "SUCCESS",
-        "message": f"Demand {demand_id} submitted to Central OCC queue.",
+        "message": f"Demand {new_demand['demand_id']} submitted to Central OCC queue.",
         "demand": new_demand
     }
 
@@ -572,54 +613,398 @@ def bundle_and_sanction_demands():
     temp_preds_path = os.path.join(ROOT_DIR, "data", "processed", "temp_demand_preds.csv")
     df_temp.to_csv(temp_preds_path, index=False)
 
-    # Solve optimal shadow block schedule with OR-Tools
-    dyn_scheduler = ORToolsBlockScheduler(predictions_csv=temp_preds_path)
-    resolved_schedule = dyn_scheduler.solve_schedule()
+    # Solve optimal shadow block schedule with OR-Tools. The freshly raised
+    # demands are flagged so the solver always evaluates them instead of letting
+    # the criticality cut-off discard them before they are ever considered.
+    dyn_scheduler = ORToolsBlockScheduler(
+        predictions_csv=temp_preds_path,
+        priority_task_ids={d["demand_id"] for d in pending}
+    )
+    _sanction_moment = sim_now()
+    resolved_schedule = dyn_scheduler.solve_schedule(
+        now_min_of_day=_sanction_moment.hour * 60 + _sanction_moment.minute
+    )
 
     # Match each demand with its assigned block window
     scheduled_blocks = resolved_schedule.get("scheduled_blocks", [])
     sanctioned_demands = []
 
-    for d in demands:
-        if d.get("status") == "PENDING_SANCTION":
+    deferred_demands = []
+    sanction_moment = _sanction_moment
+
+    # Re-read under the lock: solving takes seconds, during which the background
+    # generator may have queued more reports. Only the demands we actually solved
+    # for are touched here.
+    pending_ids = {d["demand_id"] for d in pending}
+    with sim_state.demands_lock:
+        demands = sim_state.read_demands_unlocked()
+
+        for d in demands:
+            if d.get("demand_id") not in pending_ids or d.get("status") != "PENDING_SANCTION":
+                continue
+
             d_id = d["demand_id"]
             matched_block = None
 
-            # Look for block containing this task or matching section/line
+            # Look for the block containing this task, or one covering the same
+            # section and line that this work can ride along with.
             for b in scheduled_blocks:
-                if d_id in b.get("tasks", []) or (b.get("section") == f"{d['section_from']} - {d['section_to']}" and b.get("line") == d["line"]):
+                same_section = (b.get("section") == f"{d['section_from']} - {d['section_to']}"
+                                and b.get("line") == d["line"])
+                if d_id in b.get("tasks", []) or same_section:
                     matched_block = b
                     break
 
             if matched_block:
+                # Resolve the bare "HH:MM" window into absolute simulated
+                # datetimes so the lifecycle engine survives the simulated day
+                # wrapping, and so a window already past today is honestly
+                # labelled as tomorrow's block rather than silently expiring.
+                start_dt, end_dt = resolve_window(
+                    matched_block["start_time"], matched_block["end_time"], sanction_moment
+                )
+                is_tomorrow = start_dt.date() > sanction_moment.date()
+
                 d["status"] = "APPROVED_SHADOW_BLOCK"
                 d["sanctioned_window"] = f"{matched_block['start_time']} - {matched_block['end_time']} IST"
                 d["sanction_memo_id"] = matched_block["schedule_id"]
+                d["window_start_sim"] = start_dt.isoformat()
+                d["window_end_sim"] = end_dt.isoformat()
+                d["window_day_label"] = "TOMORROW" if is_tomorrow else "TODAY"
                 sanctioned_demands.append(d)
             else:
-                # If solver deferred it to next cycle due to machine conflict
-                # Assign to the primary corridor shadow window
-                primary_block = scheduled_blocks[0] if scheduled_blocks else None
-                if primary_block:
-                    d["status"] = "APPROVED_SHADOW_BLOCK"
-                    d["sanctioned_window"] = f"{primary_block['start_time']} - {primary_block['end_time']} IST"
-                    d["sanction_memo_id"] = primary_block["schedule_id"]
-                    sanctioned_demands.append(d)
-                else:
-                    d["status"] = "DEFERRED_NEXT_CYCLE"
+                # No slot on this section could host it. Say so, rather than
+                # handing back some other block's window.
+                d["status"] = "DEFERRED_NEXT_CYCLE"
+                d["deferral_reason"] = (
+                    f"No conflict-free maintenance window available on "
+                    f"{d['section_from']} - {d['section_to']} ({d['line']}) within the 24h horizon."
+                )
+                deferred_demands.append(d)
 
-    _save_demands(demands)
+        sim_state.write_demands_unlocked(demands)
+
+    for d in sanctioned_demands:
+        sim_state.emit_event(
+            kind="DEMAND_SANCTIONED", department=d.get("department", "ALL"), severity="success",
+            title=f"Block sanctioned: {d['demand_id']}",
+            message=(f"{d.get('defect_category')} on {d.get('section_from')} - {d.get('section_to')} "
+                     f"({d.get('line')}) sanctioned for {d['sanctioned_window']} "
+                     f"[{d['window_day_label']}] under {d['sanction_memo_id']}."),
+            ref_id=d["demand_id"])
+    for d in deferred_demands:
+        sim_state.emit_event(
+            kind="DEMAND_DEFERRED", department=d.get("department", "ALL"), severity="warning",
+            title=f"Demand deferred: {d['demand_id']}",
+            message=d.get("deferral_reason", "Deferred to next planning cycle."),
+            ref_id=d["demand_id"])
 
     # Also persist to master optimized_schedule.json
     sched_path = os.path.join(ROOT_DIR, "data", "processed", "optimized_schedule.json")
     with open(sched_path, "w") as f:
         json.dump(resolved_schedule, f, indent=2)
 
+    message = (f"Successfully auto-bundled and sanctioned {len(sanctioned_demands)} "
+               f"departmental demands into unified shadow block windows!")
+    if deferred_demands:
+        message += (f" {len(deferred_demands)} deferred - no conflict-free window "
+                    f"available on their section within the 24h horizon.")
+
     return {
         "status": "SUCCESS",
-        "message": f"Successfully auto-bundled and sanctioned {len(sanctioned_demands)} departmental demands into unified shadow block windows!",
+        "message": message,
         "sanctioned_count": len(sanctioned_demands),
         "sanctioned_demands": sanctioned_demands,
+        "deferred_count": len(deferred_demands),
+        "deferred_demands": deferred_demands,
         "updated_schedule": resolved_schedule
     }
 
+
+
+# ==============================================================================
+# LIVE SIMULATOR: VIRTUAL CLOCK, WORKER FIELD REPORTS, EVENTS & EXECUTION BOARD
+# ==============================================================================
+
+@app.get("/api/clock/now")
+def get_sim_clock():
+    """The accelerated corridor clock every screen shares."""
+    return {
+        "sim_time": sim_now_iso(),
+        "real_time": pd.Timestamp.now().isoformat(),
+        "multiplier": clock_multiplier()
+    }
+
+
+def _filter_by_department(records: list, department: str) -> list:
+    dept = (department or "ALL").upper().strip()
+    if dept == "ALL":
+        return records
+    return [r for r in records if r.get("department") == dept]
+
+
+@app.get("/api/worker_requests/pending")
+def get_pending_worker_requests(department: str = "ALL"):
+    """Field reports awaiting the department officer's review."""
+    requests = [r for r in sim_state.read_worker_requests() if r.get("status") == "PENDING_REVIEW"]
+    filtered = _filter_by_department(requests, department)
+    filtered.sort(key=lambda r: r.get("submitted_at", ""), reverse=True)
+    return {
+        "department": (department or "ALL").upper(),
+        "total": len(filtered),
+        "requests": filtered
+    }
+
+
+@app.get("/api/worker_requests/history")
+def get_worker_request_history(department: str = "ALL", limit: int = 15):
+    """Recently reviewed (approved or rejected) field reports."""
+    requests = [
+        r for r in sim_state.read_worker_requests()
+        if r.get("status") in ("APPROVED_FORWARDED", "REJECTED")
+    ]
+    filtered = _filter_by_department(requests, department)
+    filtered.sort(key=lambda r: r.get("reviewed_at") or "", reverse=True)
+    return {
+        "department": (department or "ALL").upper(),
+        "total": len(filtered),
+        "requests": filtered[:limit]
+    }
+
+
+class ReviewRequest(BaseModel):
+    reason: str = ""
+    reviewed_by: str = "Department Officer"
+
+
+@app.post("/api/worker_requests/{request_id}/approve")
+def approve_worker_request(request_id: str, req: ReviewRequest = None):
+    """
+    Officer approves a field report, forwarding it to the Central OCC queue.
+
+    The whole find-and-mutate runs inside one lock hold so the generator thread
+    cannot append a new report between the read and the write.
+    """
+    reviewed_by = req.reviewed_by if req else "Department Officer"
+
+    with sim_state.worker_requests_lock:
+        requests = sim_state.read_worker_requests_unlocked()
+        match = next((r for r in requests if r.get("request_id") == request_id), None)
+
+        if match is None:
+            raise HTTPException(status_code=404, detail=f"Field report {request_id} not found")
+        if match.get("status") != "PENDING_REVIEW":
+            raise HTTPException(
+                status_code=409,
+                detail=f"Field report {request_id} is already {match.get('status')}"
+            )
+
+        match["status"] = "APPROVED_FORWARDED"
+        match["review_note"] = (req.reason if req and req.reason
+                                else "Evidence verified; forwarded to Central OCC for block sanction.")
+        match["reviewed_at"] = sim_now_iso()
+        match["reviewed_by"] = reviewed_by
+        approved = dict(match)
+        sim_state.write_worker_requests_unlocked(requests)
+
+    demand = _create_pending_demand(
+        department=approved["department"],
+        defect_category=approved["defect_category"],
+        section_from=approved["section_from"],
+        section_to=approved["section_to"],
+        line=approved["line"],
+        km_start=approved["km_start"],
+        km_end=approved["km_end"],
+        machine_required=approved["machine_required"],
+        power_block_required=approved["power_block_required"],
+        disconnection_required=approved["disconnection_required"],
+        gang_crew=approved["gang_crew"],
+        duration_requested_min=approved["duration_requested_min"],
+        priority=approved["priority"],
+        description=approved["description"],
+        asset_id=approved.get("asset_id", "")
+    )
+
+    sim_state.emit_event(
+        kind="REPORT_APPROVED", department=approved["department"], severity="info",
+        title=f"Report approved -> {demand['demand_id']}",
+        message=(f"{reviewed_by} approved {approved['request_id']} "
+                 f"({approved['defect_category']}). Forwarded to Central OCC for sanction."),
+        ref_id=demand["demand_id"])
+
+    return {
+        "status": "SUCCESS",
+        "message": f"Field report {request_id} approved and forwarded as {demand['demand_id']}.",
+        "request": approved,
+        "demand": demand
+    }
+
+
+@app.post("/api/worker_requests/{request_id}/reject")
+def reject_worker_request(request_id: str, req: ReviewRequest = None):
+    """Officer rejects a field report. It never reaches the OCC."""
+    reviewed_by = req.reviewed_by if req else "Department Officer"
+    reason = (req.reason if req and req.reason else "Not actionable / insufficient evidence")
+
+    with sim_state.worker_requests_lock:
+        requests = sim_state.read_worker_requests_unlocked()
+        match = next((r for r in requests if r.get("request_id") == request_id), None)
+
+        if match is None:
+            raise HTTPException(status_code=404, detail=f"Field report {request_id} not found")
+        if match.get("status") != "PENDING_REVIEW":
+            raise HTTPException(
+                status_code=409,
+                detail=f"Field report {request_id} is already {match.get('status')}"
+            )
+
+        match["status"] = "REJECTED"
+        match["review_note"] = reason
+        match["reviewed_at"] = sim_now_iso()
+        match["reviewed_by"] = reviewed_by
+        rejected = dict(match)
+        sim_state.write_worker_requests_unlocked(requests)
+
+    sim_state.emit_event(
+        kind="REPORT_REJECTED", department=rejected["department"], severity="warning",
+        title=f"Report rejected: {request_id}",
+        message=f"{reviewed_by} rejected {rejected['defect_category']} - {reason}",
+        ref_id=request_id)
+
+    return {
+        "status": "SUCCESS",
+        "message": f"Field report {request_id} rejected.",
+        "request": rejected
+    }
+
+
+@app.post("/api/worker_requests/clear")
+def clear_worker_requests():
+    sim_state.write_worker_requests([])
+    return {"status": "SUCCESS", "message": "Worker field report queue reset."}
+
+
+@app.post("/api/simulator/reset")
+def reset_simulator():
+    """Clean slate before a demo run: field reports, OCC demands and notifications."""
+    sim_state.write_worker_requests([])
+    sim_state.write_demands([])
+    sim_state.clear_events()
+    return {"status": "SUCCESS",
+            "message": "Simulator reset: reports, demands and notifications cleared."}
+
+
+@app.get("/api/events/feed")
+def get_event_feed(department: str = "ALL", after_seq: int = 0, limit: int = 30):
+    """
+    Notification feed backing the toasts on the OCC desk and the portals.
+
+    `after_seq` is a high-water mark: a page passes back the highest sequence it
+    has already shown, so it only ever toasts events it has not seen.
+    """
+    events = sim_state.read_events()
+    dept = (department or "ALL").upper().strip()
+    if dept != "ALL":
+        events = [e for e in events if e.get("department") in (dept, "ALL")]
+
+    fresh = [e for e in events if e.get("seq", 0) > after_seq]
+    latest_seq = events[-1]["seq"] if events else 0
+
+    return {
+        "department": dept,
+        "latest_seq": latest_seq,
+        "events": fresh[-limit:]
+    }
+
+
+def _block_exec_state(block: dict, now):
+    """
+    Derives live execution state for a scheduled block against the sim clock.
+
+    Blocks in optimized_schedule.json are a recurring daily plan, so their window
+    is resolved against the CURRENT simulated day rather than rolled forward.
+    """
+    from datetime import timedelta
+    from src.simulator.virtual_clock import parse_hhmm
+
+    day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    start_min = parse_hhmm(block.get("start_time", "00:00"))
+    end_min = parse_hhmm(block.get("end_time", "00:00"))
+    if end_min <= start_min:
+        end_min += 1440
+
+    start_dt = day_start + timedelta(minutes=start_min)
+    end_dt = day_start + timedelta(minutes=end_min)
+
+    if now >= end_dt:
+        return "COMPLETED", 100.0
+    if now >= start_dt:
+        total = (end_dt - start_dt).total_seconds()
+        pct = (now - start_dt).total_seconds() / total * 100.0 if total > 0 else 0.0
+        return "IN_PROGRESS", round(max(0.0, min(100.0, pct)), 1)
+    return "SCHEDULED", 0.0
+
+
+@app.get("/api/live/board")
+def get_live_board():
+    """
+    Live execution board: what the corridor is doing right now.
+
+    Combines the optimised daily block plan (derived state) with the demands the
+    departments actually raised (persisted lifecycle state), so the OCC can watch
+    work start, finish and occasionally get withdrawn.
+    """
+    now = sim_now()
+
+    sched_path = os.path.join(ROOT_DIR, "data", "processed", "optimized_schedule.json")
+    blocks = []
+    if os.path.exists(sched_path):
+        with open(sched_path, "r") as f:
+            for b in json.load(f).get("scheduled_blocks", []):
+                exec_status, progress = _block_exec_state(b, now)
+                blocks.append({
+                    "schedule_id": b.get("schedule_id"),
+                    "section": b.get("section"),
+                    "line": b.get("line"),
+                    "start_time": b.get("start_time"),
+                    "end_time": b.get("end_time"),
+                    "duration_min": b.get("duration_min"),
+                    "departments": b.get("departments", []),
+                    "is_multi_department": b.get("is_multi_department", False),
+                    "task_count": b.get("task_count", 0),
+                    "exec_status": exec_status,
+                    "progress_pct": progress
+                })
+
+    demands = sim_state.read_demands()
+    tracked = []
+    for d in demands:
+        if d.get("status") == "PENDING_SANCTION":
+            continue
+        entry = block_lifecycle.live_state(d, now)
+        entry.update({
+            "demand_id": d.get("demand_id"),
+            "department": d.get("department"),
+            "department_label": d.get("department_label"),
+            "defect_category": d.get("defect_category"),
+            "section": f"{d.get('section_from')} - {d.get('section_to')}",
+            "line": d.get("line"),
+            "priority": d.get("priority"),
+            "sanctioned_window": d.get("sanctioned_window"),
+            "sanction_memo_id": d.get("sanction_memo_id"),
+            "cancellation_reason": d.get("cancellation_reason"),
+            "deferral_reason": d.get("deferral_reason")
+        })
+        tracked.append(entry)
+
+    counts = {}
+    for t in tracked:
+        counts[t["status"]] = counts.get(t["status"], 0) + 1
+
+    return {
+        "sim_time": now.isoformat(),
+        "multiplier": clock_multiplier(),
+        "blocks": blocks,
+        "demands": tracked,
+        "status_counts": counts
+    }

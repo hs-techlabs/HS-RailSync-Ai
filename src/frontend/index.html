@@ -77,11 +77,9 @@
                     <span style="font-size:0.75rem; color:var(--text-muted);" id="occ-unbundled-txt">(0.0 Hrs Unbundled Track Downtime)</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="btn-portal-back" style="font-size:0.72rem; padding:4px 9px;" onclick="loadQuickDemoDemands()" title="Injects 3 simultaneous demands on ALJN-TDL for Track, OHE & S&T">
-                        ⚡ Quick Demo: Inject 3 Demands (ALJN-TDL)
-                    </button>
-                    <button class="btn-portal-back" style="font-size:0.72rem; padding:4px 8px;" onclick="clearDemoDemands()" title="Reset Queue">
-                        ↺ Reset Queue
+                    <span style="font-size:0.72rem; color:var(--text-muted);">Fed live by TMS / TDMS / SMMS officer approvals</span>
+                    <button class="btn-portal-back" style="font-size:0.72rem; padding:4px 8px;" onclick="resetSimulator()" title="Clear field reports, demands and notifications for a fresh demo run">
+                        ↺ Reset Simulator
                     </button>
                     <button class="btn-sanction-auto" id="btn-auto-bundle-sanction" onclick="triggerAutoBundleAndSanction()">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -109,6 +107,27 @@
                         </thead>
                         <tbody id="occ-demand-tbody"></tbody>
                     </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- LIVE BLOCK EXECUTION BOARD -->
+        <section class="occ-demand-section" id="occ-exec-section">
+            <div class="occ-demand-header">
+                <div class="occ-demand-title-wrap">
+                    <span class="pulse-dot" style="background:#2563eb;"></span>
+                    <strong style="font-size:0.86rem; color:var(--color-primary); letter-spacing:-0.2px;">LIVE BLOCK EXECUTION BOARD</strong>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">Sanctioned work tracked against the corridor clock</span>
+                </div>
+                <span class="sim-clock-badge" id="occ-sim-clock" title="Accelerated corridor clock">&#9201; --:--:--</span>
+            </div>
+            <div style="padding:12px 16px;">
+                <div class="exec-summary" id="occ-exec-summary"></div>
+                <div class="exec-board" id="occ-exec-board">
+                    <div class="exec-board-empty">
+                        No sanctioned departmental blocks yet. Approve field reports in the TMS / TDMS / SMMS
+                        portals, then run Auto-Bundle &amp; Sanction above.
+                    </div>
                 </div>
             </div>
         </section>
@@ -575,6 +594,7 @@
     </div>
 
     <!-- Application JavaScript Modules -->
+    <script src="/static/js/sim_clock.js"></script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/marey_chart.js"></script>
     <script src="/static/js/gantt_chart.js"></script>

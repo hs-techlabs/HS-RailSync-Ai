@@ -42,7 +42,8 @@ class NpEncoder(json.JSONEncoder):
 
 
 class ORToolsBlockScheduler:
-    def __init__(self, timetable_csv: str = None, predictions_csv: str = None):
+    def __init__(self, timetable_csv: str = None, predictions_csv: str = None,
+                 priority_task_ids=None):
         if timetable_csv is None:
             timetable_csv = os.path.join(ROOT_DIR, "data", "raw", "ndls_cnb_real_timetable.csv")
         if predictions_csv is None:
@@ -50,10 +51,46 @@ class ORToolsBlockScheduler:
 
         self.timetable_csv = timetable_csv
         self.predictions_csv = predictions_csv
+        # Task IDs that must always reach the solver regardless of criticality
+        # rank - see _select_top_bundles().
+        self.priority_task_ids = set(priority_task_ids or [])
 
-    def solve_schedule(self, horizon_hours: int = 24, max_blocks: int = 20) -> dict:
+    def _select_top_bundles(self, bundles: list, max_blocks: int) -> list:
+        """
+        Chooses which candidate bundles the solver actually sees.
+
+        Bundles are ranked by summed criticality and truncated to `max_blocks`,
+        because CP-SAT does not need all ~494 of them. That truncation is a
+        problem for freshly raised departmental demands: a single new demand
+        scores ~95 while the cut-off sits above 350, so it would be discarded
+        before the solver ever evaluated it - and then reported as "deferred"
+        without a slot ever having been considered.
+
+        Any bundle carrying a priority task is therefore admitted first. It can
+        still lose to a real constraint (no matching slot, machine limit), which
+        is a genuine deferral rather than an artefact of truncation.
+        """
+        if not self.priority_task_ids:
+            return bundles[:max_blocks]
+
+        priority_bundles = [
+            b for b in bundles
+            if self.priority_task_ids.intersection(b.get("tasks", []))
+        ]
+        remaining = [b for b in bundles if b not in priority_bundles]
+        headroom = max(0, max_blocks - len(priority_bundles))
+        return priority_bundles + remaining[:headroom]
+
+    def solve_schedule(self, horizon_hours: int = 24, max_blocks: int = 20,
+                       now_min_of_day: int = None) -> dict:
         """
         Runs the CP-SAT solver to schedule bundled maintenance tasks into available corridor slots.
+
+        `now_min_of_day` is the current minute-of-day on the operating clock. When
+        supplied, slots that have already passed are penalised, so a demand raised
+        this afternoon is offered tonight's window rather than this morning's -
+        which is what a control office actually does. It is a soft preference, not
+        a hard constraint, so the model can never become infeasible late in the day.
         """
         # Load input data
         df_preds = pd.read_csv(self.predictions_csv)
@@ -61,7 +98,7 @@ class ORToolsBlockScheduler:
         bundles = cluster_maintenance_tasks(df_preds)
 
         # Filter top priority bundles for this operational horizon
-        top_bundles = bundles[:max_blocks]
+        top_bundles = self._select_top_bundles(bundles, max_blocks)
 
         if not HAS_ORTOOLS:
             print("OR-Tools not detected in environment. Using greedy constraint solver.")
@@ -117,13 +154,24 @@ class ORToolsBlockScheduler:
         # Maximize: Sum(Bundle Criticality * X) + Bundling Bonus + Night Window Bonus - Possession Time Penalty
         objective_terms = []
         for b_idx, b in enumerate(top_bundles):
+            has_priority = bool(self.priority_task_ids.intersection(b.get("tasks", [])))
             for s_idx, s in enumerate(available_slots):
                 crit_val = int(b["total_criticality"] * 10)
                 bundle_bonus = 500 if b["is_multi_department"] else 0
                 night_bonus = 300 if s["is_night_window"] else 0
+                # A demand a department has formally raised outranks an
+                # unraised backlog item when both fit the same slot. Without
+                # this the new demand loses every contested slot on raw
+                # criticality and is reported deferred despite a window existing.
+                priority_bonus = 2000 if has_priority else 0
+                # Prefer a window that is still ahead on the operating clock.
+                upcoming_bonus = 0
+                if now_min_of_day is not None and s["start_min"] >= now_min_of_day:
+                    upcoming_bonus = 800
                 duration_cost = int(b["bundled_duration_min"] * 2)
 
-                coef = crit_val + bundle_bonus + night_bonus - duration_cost
+                coef = (crit_val + bundle_bonus + night_bonus + priority_bonus
+                        + upcoming_bonus - duration_cost)
                 objective_terms.append(coef * X[(b_idx, s_idx)])
 
         model.Maximize(sum(objective_terms))

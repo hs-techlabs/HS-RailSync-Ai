@@ -44,3 +44,7 @@ Thumbs.db
 data/raw/temp_*.csv
 data/processed/temp_*.csv
 
+# Live simulator runtime state (regenerated on every run)
+data/processed/worker_requests.json
+data/processed/sim_events.json
+

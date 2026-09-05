@@ -12,23 +12,22 @@ let cachedAssets = [];
 document.addEventListener("DOMContentLoaded", () => {
     initClock();
     initKeyboardShortcuts();
+    initNotifications("ALL");
     loadCorridorTopology();
     loadOptimalSchedule();
     loadAssetsTable();
     loadPendingDemands();
+    loadExecutionBoard();
     showHorizon("WEEKLY");
     setInterval(loadPendingDemands, 5000);
+    setInterval(loadExecutionBoard, 5000);
 });
 
 function initClock() {
-    function update() {
-        const now = new Date();
-        const str = now.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour12: false }) + " IST";
-        const el = document.getElementById("live-clock");
-        if (el) el.innerText = str;
-    }
-    update();
-    setInterval(update, 1000);
+    // The corridor runs on the accelerated simulator clock, not wall time, so
+    // the OCC header and the department portals always agree.
+    initSimClock("live-clock", "", " IST");
+    initSimClock("occ-sim-clock", "&#9201; ", " IST");
 }
 
 function initKeyboardShortcuts() {
@@ -576,72 +575,105 @@ async function triggerAutoBundleAndSanction() {
     }
 }
 
-async function loadQuickDemoDemands() {
-    // Injects 3 simultaneous co-located demands on ALJN-TDL (Track, OHE, Signal)
-    const demandsToInject = [
-        {
-            department: "ENGINEERING_TRACK",
-            defect_category: "Rail Flaw (USFD Immediate)",
-            section_from: "ALJN",
-            section_to: "TDL",
-            line: "DN",
-            km_start: 135.5,
-            km_end: 138.0,
-            machine_required: "CSM_TAMPING",
-            power_block_required: true,
-            disconnection_required: false,
-            gang_crew: "Track Gang B (14 Trackmen - ALJN Depot)",
-            duration_requested_min: 210,
-            priority: "CRITICAL",
-            description: "Deep rail crack detected on DN mainline at KM 135.5 (Tamping required)"
-        },
-        {
-            department: "TRACTION_DISTRIBUTION_OHE",
-            defect_category: "Contact Wire Wear (Condemning 8.8mm)",
-            section_from: "ALJN",
-            section_to: "TDL",
-            line: "DN",
-            km_start: 136.2,
-            km_end: 137.5,
-            machine_required: "TOWER_WAGON",
-            power_block_required: true,
-            disconnection_required: false,
-            gang_crew: "TRD Linemen Gang B (6 Linemen - ALJN Base)",
-            duration_requested_min: 180,
-            priority: "CRITICAL",
-            description: "Contact wire diameter worn to 8.8mm near Mast 136/12 (Pantograph risk)"
-        },
-        {
-            department: "SIGNAL_AND_TELECOM",
-            defect_category: "Point Machine Sluggish Throw (>5.8s Pt-101A)",
-            section_from: "ALJN",
-            section_to: "TDL",
-            line: "DN",
-            km_start: 135.0,
-            km_end: 136.0,
-            machine_required: "SIGNAL_GANG",
-            power_block_required: false,
-            disconnection_required: true,
-            gang_crew: "Signal Gang B (4 Technicians - ALJN Division)",
-            duration_requested_min: 120,
-            priority: "CRITICAL",
-            description: "Sluggish throw time 5.9s on Pt-101A crossover (Motor overhaul needed)"
-        }
-    ];
 
-    for (const d of demandsToInject) {
-        await fetch(`${API_BASE}/api/demand/raise`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(d)
-        });
+
+
+
+// ==============================================================================
+// LIVE BLOCK EXECUTION BOARD & SIMULATOR RESET
+// ==============================================================================
+
+const EXEC_STATUS_META = {
+    APPROVED_SHADOW_BLOCK: { cls: "scheduled",  label: "SANCTIONED",      badge: "status-approved" },
+    IN_PROGRESS:           { cls: "inprogress", label: "UNDER EXECUTION", badge: "status-inprogress" },
+    COMPLETED:             { cls: "completed",  label: "COMPLETED",       badge: "status-completed" },
+    CANCELLED:             { cls: "cancelled",  label: "WITHDRAWN",       badge: "status-cancelled" },
+    DEFERRED_NEXT_CYCLE:   { cls: "deferred",   label: "DEFERRED",        badge: "status-deferred" }
+};
+
+async function loadExecutionBoard() {
+    try {
+        const res = await fetch(`${API_BASE}/api/live/board`);
+        const data = await res.json();
+        renderExecutionBoard(data);
+    } catch (e) {
+        console.error("Failed to load execution board:", e);
+    }
+}
+
+function renderExecutionBoard(data) {
+    const board = document.getElementById("occ-exec-board");
+    const summary = document.getElementById("occ-exec-summary");
+    if (!board) return;
+
+    const demands = data.demands || [];
+
+    if (summary) {
+        const counts = data.status_counts || {};
+        const chips = Object.keys(EXEC_STATUS_META)
+            .filter(k => counts[k])
+            .map(k => `<span class="exec-summary-chip">${EXEC_STATUS_META[k].label}
+                        <strong>${counts[k]}</strong></span>`)
+            .join("");
+        const running = (data.blocks || []).filter(b => b.exec_status === "IN_PROGRESS").length;
+        summary.innerHTML = chips + `<span class="exec-summary-chip">Corridor blocks running now
+                                      <strong>${running}</strong></span>`;
     }
 
-    loadPendingDemands();
+    if (!demands.length) {
+        board.innerHTML = `<div class="exec-board-empty">
+            No sanctioned departmental blocks yet. Approve field reports in the TMS / TDMS / SMMS
+            portals, then run Auto-Bundle &amp; Sanction above.
+        </div>`;
+        return;
+    }
+
+    // Active work first, finished and abandoned work last.
+    const order = ["IN_PROGRESS", "APPROVED_SHADOW_BLOCK", "DEFERRED_NEXT_CYCLE", "CANCELLED", "COMPLETED"];
+    demands.sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status));
+
+    board.innerHTML = demands.map(d => {
+        const meta = EXEC_STATUS_META[d.status] || EXEC_STATUS_META.DEFERRED_NEXT_CYCLE;
+        const dept = (d.department_label || d.department || "").replace(/\s*\(.*\)/, "");
+
+        let timing = d.sanctioned_window || "No window allocated";
+        if (d.window_day_label) timing += ` · ${d.window_day_label}`;
+        if (d.status === "APPROVED_SHADOW_BLOCK" && d.sim_minutes_to_start !== null
+            && d.sim_minutes_to_start !== undefined) {
+            timing += ` · starts in ${Math.round(d.sim_minutes_to_start)} min`;
+        }
+
+        const showBar = ["IN_PROGRESS", "COMPLETED"].includes(d.status);
+        const barHtml = showBar
+            ? `<div class="exec-progress-track">
+                   <div class="exec-progress-fill ${d.status === "COMPLETED" ? "is-complete" : ""}"
+                        style="width:${d.progress_pct}%"></div>
+               </div>`
+            : "";
+
+        const note = d.cancellation_reason || d.deferral_reason;
+        const noteHtml = note ? `<div class="exec-card-note">${note}</div>` : "";
+
+        return `
+        <div class="exec-card exec-card-${meta.cls}">
+            <div class="exec-card-top">
+                <span class="exec-card-id">${d.demand_id}</span>
+                <span class="status-badge ${meta.badge}">${meta.label}</span>
+            </div>
+            <div class="exec-card-title">${d.defect_category || "Maintenance block"}</div>
+            <div class="exec-card-meta">${dept} · ${d.section} (${d.line})</div>
+            <div class="exec-card-meta">${timing}</div>
+            ${barHtml}
+            ${noteHtml}
+        </div>`;
+    }).join("");
 }
 
-async function clearDemoDemands() {
-    await fetch(`${API_BASE}/api/demand/clear`, { method: "POST" });
+async function resetSimulator() {
+    if (!confirm("Reset the simulator? This clears all field reports, demands and notifications.")) return;
+    await fetch(`${API_BASE}/api/simulator/reset`, { method: "POST" });
     loadPendingDemands();
+    loadExecutionBoard();
+    showToast("info", "Simulator reset",
+        "Field reports, demands and notifications cleared. New reports will arrive shortly.");
 }
-
