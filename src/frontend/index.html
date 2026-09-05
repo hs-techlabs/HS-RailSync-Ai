@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <link rel="stylesheet" href="/static/css/corridor_map.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
@@ -322,16 +323,13 @@
                         <h2>NDLS &ndash; CNB Corridor Track Section Map (440 KM)</h2>
                         <p>Geospatial satellite radar &amp; CTC schematic board showing UP &amp; DN lines, station junctions, speed limits, and active blocks.</p>
                     </div>
-                    <!-- View Mode Toggle -->
+                    <!-- View Mode Toggle. Basemap, layer and station controls now live
+                         inside the Corridor Map module's own toolbar. -->
                     <div class="pane-controls">
                         <div class="map-view-toggle" id="map-view-toggle">
-                            <button class="map-toggle-btn active" id="btn-view-sat" onclick="switchMapView('satellite')" title="Switch to High-Resolution Satellite Imagery">
+                            <button class="map-toggle-btn active" id="btn-view-geo" onclick="switchMapView('geo')" title="Switch to the geospatial corridor map">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                                🛰️ Satellite Imagery
-                            </button>
-                            <button class="map-toggle-btn" id="btn-view-dark" onclick="switchMapView('dark')" title="Switch to High-Contrast Dark GIS View">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                                🌙 Dark GIS
+                                🛰️ Corridor Map
                             </button>
                             <button class="map-toggle-btn" id="btn-view-schematic" onclick="switchMapView('schematic')" title="Switch to CTC Schematic Track Board">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
@@ -341,23 +339,9 @@
                     </div>
                 </div>
 
-                <!-- GIS Satellite & Dark Mode View Wrapper -->
+                <!-- Corridor Map Service: dual-track geospatial map, all departments -->
                 <div id="gis-map-wrapper">
-                    <!-- Quick-Jump Station Navigation Chips Bar -->
-                    <div class="gis-quick-jump-bar" id="gis-quick-jump-bar">
-                        <span class="gis-quick-jump-label">QUICK JUMP:</span>
-                        <button class="gis-chip-btn active" onclick="fitGISCorridorBounds()" title="Fit entire 440 KM corridor">
-                            🔍 Fit Corridor
-                        </button>
-                        <div class="gis-chips-scroll" id="gis-station-chips">
-                            <!-- Populated dynamically by gis_map.js -->
-                        </div>
-                    </div>
-
-                    <!-- Leaflet GIS Map Container -->
-                    <div class="gis-map-container" id="gis-map-container">
-                        <div id="corridor-gis-map" style="width: 100%; height: 530px;"></div>
-                    </div>
+                    <div id="occ-corridor-map"></div>
                 </div>
 
                 <!-- Original Schematic Board Container (Shown when Schematic toggle is selected) -->
@@ -599,7 +583,8 @@
     <script src="/static/js/marey_chart.js"></script>
     <script src="/static/js/gantt_chart.js"></script>
     <script src="/static/js/network_map.js"></script>
-    <script src="/static/js/gis_map.js"></script>
+    <script src="/static/js/corridor_map.js"></script>
+    <script src="/static/js/block_request.js"></script>
     <script src="/static/js/yard_schematic.js"></script>
     <script src="/static/js/simulator_ui.js"></script>
 </body>

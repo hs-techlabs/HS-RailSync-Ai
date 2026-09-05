@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initClock();
     initKeyboardShortcuts();
     initNotifications("ALL");
+    initOCCCorridorMap();
     loadCorridorTopology();
     loadOptimalSchedule();
     loadAssetsTable();
@@ -63,8 +64,28 @@ function switchTab(tabId) {
     } else if (tabId === "gantt-tab" && typeof renderGanttChart === "function") {
         setTimeout(renderGanttChart, 50);
     } else if (tabId === "network-tab") {
-        if (typeof invalidateGISMap === "function") setTimeout(invalidateGISMap, 80);
+        // Leaflet cannot size itself while its container is display:none, so the
+        // map has to be told to re-measure once the tab is actually visible.
+        setTimeout(() => CorridorMap.invalidateAll(), 80);
     }
+}
+
+/**
+ * Mounts the Corridor Map Service on the OCC desk with every department's
+ * layers. The same module powers the three portal screens; only the department
+ * and layer set differ.
+ */
+let occCorridorMap = null;
+
+function initOCCCorridorMap() {
+    if (typeof CorridorMap === "undefined") return;
+    occCorridorMap = CorridorMap.mount("#occ-corridor-map", {
+        department: "ALL",
+        layers: ["issues", "blocks", "routines", "assets", "health"],
+        showTrains: true,
+        tall: true,
+        onInspect: openBlockRequestForm
+    });
 }
 
 async function loadCorridorTopology() {
@@ -73,9 +94,6 @@ async function loadCorridorTopology() {
         currentTopologyData = await res.json();
         if (typeof renderNetworkTrackDiagram === "function") {
             renderNetworkTrackDiagram(currentTopologyData);
-        }
-        if (typeof initGISMap === "function") {
-            initGISMap(currentTopologyData);
         }
     } catch (e) {
         console.error("Failed to load topology:", e);
@@ -99,11 +117,38 @@ async function loadOptimalSchedule() {
         if (typeof renderNetworkTrackDiagram === "function" && currentTopologyData) {
             renderNetworkTrackDiagram(currentTopologyData);
         }
-        if (typeof refreshGISBlockOverlays === "function") {
-            refreshGISBlockOverlays();
-        }
+        // The corridor map polls /api/map/layers on its own schedule, so it
+        // needs no prompting when the optimised schedule is reloaded.
     } catch (e) {
         console.error("Failed to load optimal schedule:", e);
+    }
+}
+
+/**
+ * Tab 3 view switch: the geospatial corridor map, or the CTC schematic board.
+ * Basemap, layer and station-jump controls live inside the map's own toolbar.
+ */
+function switchMapView(mode) {
+    const geoWrapper = document.getElementById("gis-map-wrapper");
+    const schematic = document.getElementById("schematic-board-container");
+
+    const btnGeo = document.getElementById("btn-view-geo");
+    const btnSchematic = document.getElementById("btn-view-schematic");
+    if (btnGeo) btnGeo.classList.toggle("active", mode === "geo");
+    if (btnSchematic) btnSchematic.classList.toggle("active", mode === "schematic");
+
+    if (mode === "schematic") {
+        if (geoWrapper) geoWrapper.style.display = "none";
+        if (schematic) {
+            schematic.style.display = "block";
+            if (typeof renderNetworkTrackDiagram === "function" && currentTopologyData) {
+                renderNetworkTrackDiagram(currentTopologyData);
+            }
+        }
+    } else {
+        if (schematic) schematic.style.display = "none";
+        if (geoWrapper) geoWrapper.style.display = "block";
+        setTimeout(() => CorridorMap.invalidateAll(), 80);
     }
 }
 
@@ -556,9 +601,7 @@ async function triggerAutoBundleAndSanction() {
                 if (typeof renderNetworkTrackDiagram === "function" && currentTopologyData) {
                     renderNetworkTrackDiagram(currentTopologyData);
                 }
-                if (typeof refreshGISBlockOverlays === "function") {
-                    refreshGISBlockOverlays();
-                }
+                CorridorMap.instances.forEach(m => m.refresh());
             }
         } else {
             alert(data.message || "Optimization complete.");

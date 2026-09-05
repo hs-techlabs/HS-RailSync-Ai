@@ -18,6 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
         onChange: loadTMSDemands
     });
 
+    // Corridor map: track defects reported from the field, blocks currently on
+    // the corridor, and routine inspections coming due.
+    CorridorMap.mount("#tms-corridor-map", {
+        department: "ENGINEERING_TRACK",
+        layers: ["issues", "blocks", "routines"],
+        onInspect: openBlockRequestForm
+    });
+
     loadTMSDemands();
     setInterval(loadTMSDemands, 5000);
 });

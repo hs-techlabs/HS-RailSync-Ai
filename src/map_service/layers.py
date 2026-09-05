@@ -30,6 +30,7 @@ Layer -> screen mapping:
     health    SMMS 3.2                       per-section S&T system health
 """
 
+import math
 import os
 from datetime import timedelta
 
@@ -108,6 +109,36 @@ def _sort_features(features: list) -> list:
         features,
         key=lambda f: (SEVERITY_ORDER.get(f.get("severity"), 9), f.get("km_start", 0.0))
     )
+
+
+def _scrub(value):
+    """
+    Makes a feature tree JSON-safe.
+
+    The backlog CSV is sparse by design - each department fills in its own
+    diagnostic columns and leaves the others empty - so a row read through
+    pandas carries NaN in most fields. NaN is not valid JSON and starlette
+    refuses to serialise it, so it becomes null here, along with numpy scalars
+    that json does not know how to encode.
+    """
+    if isinstance(value, dict):
+        return {k: _scrub(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_scrub(v) for v in value]
+    if isinstance(value, float):
+        return None if math.isnan(value) or math.isinf(value) else value
+    if value is None or isinstance(value, (str, bool, int)):
+        return value
+    # numpy scalars and pandas NA sentinels
+    if hasattr(value, "item"):
+        try:
+            return _scrub(value.item())
+        except (ValueError, AttributeError):
+            return str(value)
+    if value is pd.NaT or (hasattr(pd, "isna") and not isinstance(value, (list, dict))
+                           and pd.isna(value)):
+        return None
+    return value
 
 
 # ---------------------------------------------------------------------------
@@ -526,7 +557,7 @@ def build_layers(department: str = "ALL", names: list = None) -> dict:
             errors[name] = "unknown layer"
             continue
         try:
-            out[name] = builder(dept)
+            out[name] = _scrub(builder(dept))
         except Exception as exc:  # pragma: no cover - defensive on a live demo
             out[name] = []
             errors[name] = str(exc)

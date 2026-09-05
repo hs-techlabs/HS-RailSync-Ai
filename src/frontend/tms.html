@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Management System (TMS) | Indian Railways Civil Engineering Portal</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/corridor_map.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body class="portal-page-body">
     <div class="portal-container">
@@ -36,6 +39,22 @@
                 </a>
             </div>
         </header>
+
+        <!-- Corridor Map: reported issues, current blocks, scheduled routine checks -->
+        <div class="portal-card" style="margin-bottom:18px;">
+            <div class="portal-card-header">
+                <h2>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16M16 6v16"/></svg>
+                    Corridor Track Map &mdash; Track Issues, Live Blocks &amp; Routine Dues
+                </h2>
+                <span style="font-size:0.75rem; color:var(--text-muted);">
+                    Hover a marker for details &bull; Inspect to raise a block requisition
+                </span>
+            </div>
+            <div class="portal-card-body" style="padding:0;">
+                <div id="tms-corridor-map"></div>
+            </div>
+        </div>
 
         <!-- 2-Column Portal Grid -->
         <div class="portal-grid">
@@ -141,6 +160,8 @@
 
     <script src="/static/js/sim_clock.js"></script>
     <script src="/static/js/portal_review.js"></script>
+    <script src="/static/js/corridor_map.js"></script>
+    <script src="/static/js/block_request.js"></script>
     <script src="/static/js/tms_portal.js"></script>
 </body>
 </html>

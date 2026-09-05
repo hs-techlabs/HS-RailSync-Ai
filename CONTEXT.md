@@ -21,6 +21,7 @@ The **Indian Railways AI-Powered Automatic Block Planning System** is an intelli
   - Joblib (`joblib>=1.3.0`) for model weight serialization
 - **Mathematical Optimization:** Google OR-Tools (`ortools>=9.8.0`) CP-SAT Constraint Programming Solver
 - **Frontend Architecture:** Vanilla HTML5 + CSS3 + Modern JavaScript (ES6+), Plotly.js (`v2.35.2` via CDN), Leaflet.js (`v1.9.4` via CDN) with ESRI World Imagery & CartoDB Dark Matter tile servers, Programmatic SVG Schematics
+- **Geospatial Corridor Map:** Independent in-repo service — `src/map_service/` (read models, served at `/api/map/*`) + `src/frontend/js/corridor_map.js` (drop-in Leaflet module). Renders UP and DN as two distinct rails via a zoom-reactive parallel offset computed from per-vertex bearings, and is mounted identically on the OCC desk and all three department portals.
 - **Design System & Typography:** Inter, JetBrains Mono, Microsoft Fluent UI SVG icons (Zero gradients, Minimalist Modern Light Theme)
 
 ---
@@ -67,17 +68,22 @@ SIH RAILWAY/
 │   ├── __init__.py
 │   ├── api/
 │   │   ├── __init__.py
-│   │   └── main.py                    # FastAPI app, CORS, REST routes, portal servers & demand APIs
+│   │   ├── main.py                    # FastAPI app, CORS, REST routes, portal servers & demand APIs
+│   │   └── map_router.py              # /api/map/* HTTP surface for the Corridor Map Service
 │   ├── frontend/
 │   │   ├── index.html                 # Central OCC Master Desk SPA with Live Demand Queue & portal links
 │   │   ├── tms.html                   # Track Management System (IRCEP TMS Civil Desk) portal
 │   │   ├── tdms.html                  # Traction Distribution Management System (RailSaver TRD Desk) portal
 │   │   ├── smms.html                  # Signal Maintenance Management System (SMMS IR S&T Desk) portal
 │   │   ├── css/
-│   │   │   └── style.css              # Minimalist light theme tokens, portal branding, responsive layouts
+│   │   │   ├── style.css              # Minimalist light theme tokens, portal branding, responsive layouts
+│   │   │   └── corridor_map.css       # Corridor Map Service styling (rails, markers, hover cards, legend)
 │   │   └── js/
 │   │       ├── app.js                 # Central OCC coordinator, live demand queue loader, CP-SAT bundler
-│   │       ├── gis_map.js             # Leaflet geospatial satellite radar map & animated shadow block overlays
+│   │       ├── corridor_map.js        # Drop-in dual-track Leaflet map module (UP/DN rails, layers, trains)
+│   │       ├── block_request.js       # Inspect -> prefilled requisition -> Request Block flow
+│   │       ├── portal_review.js       # Shared department review console (queue, evidence, approve/reject)
+│   │       ├── sim_clock.js           # Accelerated corridor clock badge & notification poller
 │   │       ├── tms_portal.js          # TMS portal controller & status poller
 │   │       ├── tdms_portal.js         # TDMS portal controller & 25 kV power permit poller
 │   │       ├── smms_portal.js         # SMMS portal controller & disconnection notice poller
@@ -107,11 +113,22 @@ SIH RAILWAY/
 │   │   ├── bundling_engine.py         # Spatial partition clustering for multi-department shadow blocks
 │   │   ├── ortools_scheduler.py       # Google OR-Tools CP-SAT mathematical optimization model
 │   │   └── multi_horizon.py           # 30-Day Strategic & 7-Day Tactical matrix generators
+│   ├── map_service/                   # Corridor Map Service - geospatial read models (no state mutation)
+│   │   ├── __init__.py
+│   │   ├── geometry.py                # Single authority: chainage (KM) <-> WGS-84, bearings, section index
+│   │   ├── layers.py                  # issues | blocks | powercuts | routines | assets | health
+│   │   └── trains.py                  # Live train positions interpolated from the timetable
 │   └── simulator/
 │       ├── __init__.py
+│       ├── virtual_clock.py           # Stateless 80x accelerated corridor clock (24h in ~18 real min)
+│       ├── sim_state.py               # Lock-ordered JSON persistence & event log
+│       ├── fault_generator.py         # Daemon thread generating worker field reports from real asset rows
+│       ├── block_lifecycle.py         # APPROVED -> IN_PROGRESS -> COMPLETED / CANCELLED transitions
 │       └── disruption_engine.py       # Sub-second train delay & emergency defect rescheduler
 └── tests/
     ├── test_data_generator.py         # Unit tests for RDSO formulas and data synthesizers
+    ├── test_realtime_simulator.py     # Clock, fault generator, review workflow, lifecycle & events
+    ├── test_map_service.py            # Geometry, layers, trains, /api/map/* and block-request overrides
     └── test_system_integration.py     # End-to-end integration tests (ML, optimizer, speed, API, Yard, Demands)
 ```
 

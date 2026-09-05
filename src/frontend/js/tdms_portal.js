@@ -18,6 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
         onChange: loadTDMSDemands
     });
 
+    // Corridor map: OHE defects reported from the field, assets high in wear
+    // needing attention, and approved blocks carrying a 25 kV isolation.
+    CorridorMap.mount("#tdms-corridor-map", {
+        department: "TRACTION_DISTRIBUTION_OHE",
+        layers: ["issues", "assets", "powercuts"],
+        onInspect: openBlockRequestForm
+    });
+
     loadTDMSDemands();
     setInterval(loadTDMSDemands, 5000);
 });

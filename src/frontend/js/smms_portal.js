@@ -18,6 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
         onChange: loadSMMSDemands
     });
 
+    // Corridor map: S&T defects reported from the field, and per-section system
+    // health drawn as coloured stretches of line.
+    CorridorMap.mount("#smms-corridor-map", {
+        department: "SIGNAL_AND_TELECOM",
+        layers: ["issues", "health"],
+        onInspect: openBlockRequestForm
+    });
+
     loadSMMSDemands();
     setInterval(loadSMMSDemands, 5000);
 });

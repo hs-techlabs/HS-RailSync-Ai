@@ -87,9 +87,7 @@ async function runTrainDelaySimulation() {
             if (typeof renderNetworkTrackDiagram === "function" && currentTopologyData) {
                 renderNetworkTrackDiagram(currentTopologyData);
             }
-            if (typeof refreshGISBlockOverlays === "function") {
-                refreshGISBlockOverlays();
-            }
+            CorridorMap.instances.forEach(m => m.refresh());
         }
     } catch (e) {
         document.getElementById("sim-status-badge").innerText = "ERROR";
@@ -127,9 +125,7 @@ async function runDefectSimulation() {
             if (typeof renderNetworkTrackDiagram === "function" && currentTopologyData) {
                 renderNetworkTrackDiagram(currentTopologyData);
             }
-            if (typeof refreshGISBlockOverlays === "function") {
-                refreshGISBlockOverlays();
-            }
+            CorridorMap.instances.forEach(m => m.refresh());
         }
     } catch (e) {
         document.getElementById("sim-status-badge").innerText = "ERROR";

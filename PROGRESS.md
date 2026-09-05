@@ -1,12 +1,23 @@
 # PROGRESS.md — Active Development Tracking
 
 ## 1. Current Phase
-- **Phase:** Phase 12 — Geospatial GIS Satellite Radar & Multi-Layer Map Engine Shipped & Verified Locally
-- **Status:** Complete geospatial radar tracking and multi-layer map system verified. High-resolution ESRI satellite imagery and CartoDB dark GIS modes are fully functional with live animated shadow block radar pings, station quick-jump navigation chips, glassmorphic station popups, and full integration with the IRSEM station yard interlocking modal. All 19 unit & integration tests pass (19/19 in 2.5s).
+- **Phase:** Phase 14 — Corridor Map Service (Dual-Track Geospatial Layer Engine) Shipped & Verified Locally
+- **Status:** The corridor map is now an independent, reusable service rendering UP and DN as two distinct tracks and driven entirely by live simulator state. It powers the Central OCC desk and all three department portals from one implementation; the old single-polyline `gis_map.js` is retired. All 69 unit & integration tests pass (69/69 in ~3.4s), and all four pages render with zero console errors.
 
 ---
 
 ## 2. Completed Features (Shipped & Verified)
+
+### Phase 14 — Corridor Map Service (`src/map_service/`, `js/corridor_map.js`)
+- **Independent, reusable map service.** A backend read-model package (`src/map_service/`) plus a drop-in frontend module. Any page adopts it in one call: `CorridorMap.mount("#el", { department, layers, onInspect })`. Served over `/api/map/*` from `src/api/map_router.py`; the OCC and the three portals differ only in department and layer set.
+- **Dual-track UP/DN rendering.** `geometry.py` is the single authority for chainage → WGS-84, publishing the centreline plus a per-vertex bearing. The parallel offset is applied client-side per zoom (~6 px each side of centre, clamped 3 m–5 km), so the rails read as two clearly separate lines on the 440 KM overview and converge toward realistic spacing by zoom 16. Station beacons sit on the centreline, bridging the pair.
+- **Six live layers, one feature shape.** `issues` (field reports awaiting review), `blocks` (sanctioned possessions with live execution state), `powercuts` (blocks carrying 25 kV isolation), `routines` (statutory inspections due/overdue), `assets` (wear needing attention now vs near term), `health` (per-section S&T system health drawn as coloured spans). Severity drives marker colour uniformly across all of them.
+- **Live train movement.** `trains.py` interpolates all 29 timetabled trains between their bracketing stops against the accelerated clock. Markers are moved with `setLatLng`, never recreated, so a 2 s poll reads as continuous motion.
+- **Inspect → prefilled form → Request Block.** Hovering a reported issue shows a compact card; clicking opens the full record with site photos and inspection PDF, and an Inspect action that opens a fully prefilled block requisition. The officer's only required action is the *Request Block* button at the end. Submits to the existing approve endpoint, which now accepts optional officer overrides.
+- **Wired to the simulator.** Layers read live worker requests, demands and `block_lifecycle.live_state()` — the same function `/api/live/board` uses — so the map and the OCC execution board can never disagree.
+- **Retired:** `src/frontend/js/gis_map.js` (single-polyline static map). Its satellite/dark basemaps, station quick-jump and yard drill-down are preserved inside the new module.
+
+### Earlier phases
 - **Leaflet Geospatial Satellite Radar Map (`gis_map.js`):** Interactive geospatial map powered by Leaflet.js with ESRI World Imagery (High-Resolution Satellite) and CartoDB Dark Matter tile engines, mapping the full 440 KM New Delhi – Kanpur Central corridor with precise GPS station anchors and a high-contrast electric cyan railway mainline polyline (`#38bdf8`).
 - **3-Way Corridor View Toggle:** Seamless 1-click switching between 🛰️ Satellite Radar (ESRI), 🌙 Dark GIS (CartoDB), and 📐 Centralized Traffic Control (CTC) Schematic Board.
 - **Quick-Jump Station Navigation Chips:** Clickable horizontal chip bar (`📍 NDLS` through `📍 CNB`) featuring smooth `flyTo` camera easing, auto-zoom (level 13.5), and automated station popup opening.
@@ -38,13 +49,14 @@
 ---
 
 ## 3. In Progress
-- System is rock-solid, fully polished, and feature-complete with 100% test pass rate (19/19 tests).
+- System is feature-complete with a 100% test pass rate (69/69 tests).
+- **Note for the next session:** the realtime simulator was committed in `add4c9c` ("full realtime simulator ready"). That commit also swept up three Corridor Map Service files (`src/map_service/__init__.py`, `geometry.py`, `layers.py`) while they were still mid-write, so `layers.py` has since changed and the rest of the map service — `map_service/trains.py`, `api/map_router.py`, `js/corridor_map.js`, `js/block_request.js`, `css/corridor_map.css`, `tests/test_map_service.py` — is still untracked. The whole map service should go in as one follow-up commit.
 - Ready for hackathon presentation, video recording, live demos, or packaging.
 
 ---
 
 ## 4. Known Bugs & Open Issues
-- *No critical or blocking bugs open.* (All 19 integration tests pass cleanly in 2.5s; all 4 portal workflows validated in live browser).
+- *No critical or blocking bugs open.* (All 69 integration tests pass cleanly in ~3.4s; all 4 portal workflows and the corridor map validated in a live headless browser with zero console errors.)
 
 ---
 
@@ -54,7 +66,7 @@
 ```powershell
 py -3.13 -m unittest discover tests/
 ```
-*Expected Result: `Ran 19 tests in ~2.5s -> OK`*
+*Expected Result: `Ran 69 tests in ~3.4s -> OK`*
 
 ### 5.2 Test Multi-Department Demand Lifecycle & Bundling
 ```powershell

@@ -37,6 +37,7 @@ from src.simulator import sim_state, fault_generator, block_lifecycle
 from src.simulator.virtual_clock import (
     sim_now, sim_now_iso, multiplier as clock_multiplier, resolve_window
 )
+from src.api.map_router import router as map_router
 
 app = FastAPI(
     title="Indian Railways AI Automatic Block Planning System",
@@ -62,6 +63,10 @@ if os.path.exists(frontend_dir):
 attachments_dir = os.path.join(ROOT_DIR, "data", "attachments")
 if os.path.exists(attachments_dir):
     app.mount("/attachments", StaticFiles(directory=attachments_dir), name="attachments")
+
+# Corridor Map Service (/api/map/*). Self-contained: it reads simulator state
+# and the ML backlog, and never writes either.
+app.include_router(map_router)
 
 # Instantiate engines lazily
 scheduler = ORToolsBlockScheduler()
@@ -773,8 +778,26 @@ def get_worker_request_history(department: str = "ALL", limit: int = 15):
 
 
 class ReviewRequest(BaseModel):
+    """
+    An officer's decision on a field report.
+
+    Every field below `reviewed_by` is an optional override carrying an edit the
+    officer made on the block-request form before submitting it. They are all
+    optional on purpose: the plain approve button in portal_review.js sends none
+    of them and keeps working exactly as before, while the map's Inspect ->
+    Request Block form can adjust duration, priority or the safety flags without
+    needing a second endpoint.
+    """
     reason: str = ""
     reviewed_by: str = "Department Officer"
+
+    duration_requested_min: int = None
+    priority: str = None
+    machine_required: str = None
+    gang_crew: str = None
+    description: str = None
+    power_block_required: bool = None
+    disconnection_required: bool = None
 
 
 @app.post("/api/worker_requests/{request_id}/approve")
@@ -807,6 +830,12 @@ def approve_worker_request(request_id: str, req: ReviewRequest = None):
         approved = dict(match)
         sim_state.write_worker_requests_unlocked(requests)
 
+    # Officer edits from the block-request form win over the reported values;
+    # anything left untouched falls back to what the field report said.
+    def _override(field):
+        supplied = getattr(req, field, None) if req else None
+        return approved[field] if supplied is None else supplied
+
     demand = _create_pending_demand(
         department=approved["department"],
         defect_category=approved["defect_category"],
@@ -815,13 +844,13 @@ def approve_worker_request(request_id: str, req: ReviewRequest = None):
         line=approved["line"],
         km_start=approved["km_start"],
         km_end=approved["km_end"],
-        machine_required=approved["machine_required"],
-        power_block_required=approved["power_block_required"],
-        disconnection_required=approved["disconnection_required"],
-        gang_crew=approved["gang_crew"],
-        duration_requested_min=approved["duration_requested_min"],
-        priority=approved["priority"],
-        description=approved["description"],
+        machine_required=_override("machine_required"),
+        power_block_required=_override("power_block_required"),
+        disconnection_required=_override("disconnection_required"),
+        gang_crew=_override("gang_crew"),
+        duration_requested_min=_override("duration_requested_min"),
+        priority=_override("priority"),
+        description=_override("description"),
         asset_id=approved.get("asset_id", "")
     )
 

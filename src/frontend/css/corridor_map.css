@@ -1,0 +1,519 @@
+/* ==========================================================================
+   CORRIDOR MAP SERVICE
+   Drop-in dual-track geospatial map. Self-contained so any page can adopt it
+   with one <link>; inherits the Fluent design tokens from style.css when that
+   is also loaded, and falls back to literals when it is not.
+   ========================================================================== */
+
+.cmap-shell {
+    position: relative;
+    isolation: isolate;          /* keeps the Leaflet canvas under page modals */
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-md, 8px);
+    background: var(--bg-surface, #fff);
+    overflow: hidden;
+}
+
+.cmap-canvas {
+    width: 100%;
+    height: 440px;
+    background: #0f172a;
+}
+
+.cmap-canvas.is-tall { height: 530px; }
+
+/* Leaflet paints its own stacking contexts; keep them below app modals. */
+.cmap-shell .leaflet-pane,
+.cmap-shell .leaflet-top,
+.cmap-shell .leaflet-bottom { z-index: 400; }
+
+
+/* --------------------------------------------------------------------------
+   Toolbar: basemap switch, layer toggles, station quick-jump
+   -------------------------------------------------------------------------- */
+
+.cmap-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-surface-subtle, #f1f5f9);
+}
+
+.cmap-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cmap-toolbar-sep {
+    width: 1px;
+    align-self: stretch;
+    background: var(--border-medium, #cbd5e1);
+    margin: 2px 4px;
+}
+
+.cmap-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    font-family: var(--font-main, 'Inter', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary, #334155);
+    background: var(--bg-surface, #fff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-xs, 4px);
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+    white-space: nowrap;
+}
+
+.cmap-btn:hover {
+    background: var(--bg-surface-hover, #e2e8f0);
+    border-color: var(--border-medium, #cbd5e1);
+}
+
+.cmap-btn.is-active {
+    background: var(--color-primary, #0f2b5c);
+    border-color: var(--color-primary, #0f2b5c);
+    color: #fff;
+}
+
+/* Layer toggles carry their layer's colour as a leading dot. */
+.cmap-layer-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+    background: currentColor;
+}
+
+.cmap-chip-rail {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-surface, #fff);
+    scrollbar-width: thin;
+}
+
+.cmap-chip {
+    padding: 3px 8px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-secondary, #334155);
+    background: var(--bg-surface-subtle, #f1f5f9);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.cmap-chip:hover { background: var(--bg-surface-hover, #e2e8f0); }
+
+.cmap-chip.is-active {
+    background: var(--color-primary, #0f2b5c);
+    border-color: var(--color-primary, #0f2b5c);
+    color: #fff;
+}
+
+
+/* --------------------------------------------------------------------------
+   Legend
+   -------------------------------------------------------------------------- */
+
+.cmap-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 10px;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-surface-subtle, #f1f5f9);
+    font-size: 0.68rem;
+    color: var(--text-muted, #64748b);
+}
+
+.cmap-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.cmap-legend-rail {
+    width: 16px;
+    height: 3px;
+    border-radius: 2px;
+    flex: none;
+}
+
+.cmap-legend-count {
+    margin-left: auto;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.66rem;
+    color: var(--text-subtle, #94a3b8);
+}
+
+
+/* --------------------------------------------------------------------------
+   Station beacons (sit on the centreline, bridging both rails)
+   -------------------------------------------------------------------------- */
+
+.cmap-station-icon { background: none !important; border: none !important; }
+
+.cmap-station {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.cmap-station-core {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 17px;
+    padding: 0 5px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: #fff;
+    background: #0f172a;
+    border: 1.5px solid #f8fafc;
+    border-radius: 3px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .5);
+    white-space: nowrap;
+}
+
+.cmap-station-tick {
+    position: absolute;
+    width: 2px;
+    background: #f8fafc;
+    opacity: .85;
+}
+
+
+/* --------------------------------------------------------------------------
+   Feature markers. Severity drives the colour across every layer.
+   -------------------------------------------------------------------------- */
+
+.cmap-marker-icon { background: none !important; border: none !important; }
+
+.cmap-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+    line-height: 1;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, .45);
+    cursor: pointer;
+    transition: transform .12s ease;
+}
+
+.cmap-marker:hover { transform: scale(1.25); }
+
+.cmap-sev-critical { background: #dc2626; }
+.cmap-sev-high     { background: #d97706; }
+.cmap-sev-medium   { background: #2563eb; }
+.cmap-sev-low      { background: #059669; }
+
+/* A block that is actually running gets a pulsing ring so it reads as live. */
+.cmap-marker.is-running { animation: cmap-pulse 1.8s ease-out infinite; }
+
+@keyframes cmap-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(220, 38, 38, .65); }
+    70%  { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+
+/* --------------------------------------------------------------------------
+   Trains
+   -------------------------------------------------------------------------- */
+
+.cmap-train-icon { background: none !important; border: none !important; }
+
+/* Leaflet repositions markers via transform, so transitioning transform is what
+   turns a 5-second poll into continuous motion. */
+.cmap-train-icon.leaflet-marker-icon {
+    transition: transform 1.2s linear;
+    will-change: transform;
+}
+
+.cmap-train {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, .5);
+}
+
+.cmap-train.premium   { background: #7c3aed; }
+.cmap-train.express   { background: #0891b2; }
+.cmap-train.passenger { background: #475569; }
+.cmap-train.freight   { background: #78716c; }
+.cmap-train.is-halted { opacity: .6; }
+
+
+/* --------------------------------------------------------------------------
+   Hover card + popup
+   -------------------------------------------------------------------------- */
+
+.cmap-tooltip {
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.cmap-tooltip::before { display: none !important; }
+
+.cmap-card {
+    width: 268px;
+    font-family: var(--font-main, 'Inter', sans-serif);
+    color: #f8fafc;
+    background: rgba(15, 23, 42, .96);
+    border: 1px solid rgba(148, 163, 184, .3);
+    border-radius: var(--radius-sm, 6px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+    overflow: hidden;
+}
+
+.cmap-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(148, 163, 184, .22);
+}
+
+.cmap-card-title {
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.cmap-card-sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.66rem;
+    color: #94a3b8;
+}
+
+.cmap-card-sev {
+    flex: none;
+    padding: 2px 6px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: #fff;
+    border-radius: 3px;
+}
+
+.cmap-card-body { padding: 8px 10px; }
+
+.cmap-card.is-compact { width: 232px; }
+
+.cmap-card-hint {
+    margin-top: 7px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(148, 163, 184, .18);
+    font-size: 0.62rem;
+    color: #64748b;
+    text-align: center;
+}
+
+.cmap-card-rows {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+    font-size: 0.68rem;
+}
+
+.cmap-card-key { color: #94a3b8; }
+
+.cmap-card-val {
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.cmap-card-desc {
+    margin-top: 7px;
+    padding-top: 7px;
+    border-top: 1px solid rgba(148, 163, 184, .2);
+    font-size: 0.68rem;
+    line-height: 1.45;
+    color: #cbd5e1;
+}
+
+.cmap-card-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 7px;
+}
+
+.cmap-flag {
+    padding: 2px 6px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    border-radius: 3px;
+    background: rgba(148, 163, 184, .18);
+    color: #e2e8f0;
+}
+
+.cmap-flag.is-power { background: rgba(217, 119, 6, .25); color: #fcd34d; }
+.cmap-flag.is-disc  { background: rgba(5, 150, 105, .25); color: #6ee7b7; }
+
+/* Attachment thumbnails inside the popup */
+.cmap-card-atts {
+    display: flex;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.cmap-att {
+    width: 42px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 3px;
+    border: 1px solid rgba(148, 163, 184, .35);
+    cursor: pointer;
+    background: rgba(148, 163, 184, .15);
+}
+
+.cmap-att:hover { border-color: #38bdf8; }
+
+.cmap-att-pdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.cmap-card-actions {
+    display: flex;
+    gap: 6px;
+    padding: 8px 10px;
+    border-top: 1px solid rgba(148, 163, 184, .22);
+    background: rgba(2, 6, 23, .5);
+}
+
+.cmap-action {
+    flex: 1;
+    padding: 5px 8px;
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    background: rgba(148, 163, 184, .16);
+    border: 1px solid rgba(148, 163, 184, .3);
+    border-radius: var(--radius-xs, 4px);
+    cursor: pointer;
+}
+
+.cmap-action:hover { background: rgba(148, 163, 184, .28); }
+
+.cmap-action.is-primary {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+
+.cmap-action.is-primary:hover { background: #1d4ed8; }
+
+/* Leaflet's own popup chrome, restyled to match the card */
+.cmap-popup .leaflet-popup-content-wrapper {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    border-radius: var(--radius-sm, 6px);
+}
+
+.cmap-popup .leaflet-popup-content { margin: 0; width: auto !important; }
+.cmap-popup .leaflet-popup-tip { background: rgba(15, 23, 42, .96); }
+.cmap-popup a.leaflet-popup-close-button { color: #94a3b8; }
+
+
+/* --------------------------------------------------------------------------
+   Per-system health table (SMMS)
+   -------------------------------------------------------------------------- */
+
+.cmap-health-table {
+    width: 100%;
+    margin-top: 7px;
+    border-collapse: collapse;
+    font-size: 0.66rem;
+}
+
+.cmap-health-table th {
+    padding: 3px 4px;
+    text-align: left;
+    font-weight: 600;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(148, 163, 184, .22);
+}
+
+.cmap-health-table td {
+    padding: 3px 4px;
+    border-bottom: 1px solid rgba(148, 163, 184, .1);
+    font-variant-numeric: tabular-nums;
+}
+
+.cmap-health-table td:last-child,
+.cmap-health-table th:last-child { text-align: right; }
+
+.cmap-health-pill {
+    display: inline-block;
+    min-width: 34px;
+    padding: 1px 5px;
+    text-align: center;
+    font-weight: 700;
+    border-radius: 3px;
+    color: #fff;
+}
+
+
+/* --------------------------------------------------------------------------
+   Empty / loading state
+   -------------------------------------------------------------------------- */
+
+.cmap-status {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 500;
+    padding: 8px 14px;
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    background: rgba(15, 23, 42, .88);
+    border: 1px solid rgba(148, 163, 184, .3);
+    border-radius: var(--radius-sm, 6px);
+    pointer-events: none;
+}
+
+.cmap-status[hidden] { display: none !important; }
