@@ -71,22 +71,22 @@ function renderMareyChart() {
             hoverTexts.push(`<b>${tData.name} (${tNo})</b><br>Station: ${st.station} (KM ${st.km_location})<br>Scheduled Time: ${st.arrival_time}<br>Direction: ${tData.dir} Line`);
         });
 
-        // Clean Solid Departmental Tones
-        let color = "#2563eb";
+        // High-contrast, editorial train trajectories
+        let color = "#242424"; // Deep graphite for standard trains
         let width = 1.8;
         let dash = "solid";
 
         if (tData.type === "RAJDHANI") {
-            color = "#dc2626"; // Crimson
-            width = 2.4;
+            color = "#C94F4F"; // Muted Crimson
+            width = 2.2;
         } else if (tData.type === "VANDE_BHARAT") {
-            color = "#4f46e5"; // Indigo
-            width = 2.4;
+            color = "#2B4C6F"; // Technical Slate Blue
+            width = 2.2;
         } else if (tData.type === "SHATABDI") {
-            color = "#059669"; // Emerald
+            color = "#56806C"; // Muted Spruce Green
             width = 2.0;
         } else if (tData.type === "FREIGHT") {
-            color = "#64748b"; // Slate
+            color = "#6D6D68"; // Technical Grey
             width = 1.4;
             dash = "dash";
         }
@@ -104,7 +104,7 @@ function renderMareyChart() {
                 dash: dash
             },
             marker: {
-                size: 4,
+                size: 3.5,
                 color: color
             },
             showlegend: false
@@ -130,10 +130,10 @@ function renderMareyChart() {
                 x1: endH,
                 y0: kmMin,
                 y1: kmMax,
-                fillcolor: "rgba(99, 102, 241, 0.16)",
+                fillcolor: "rgba(198, 154, 43, 0.18)",
                 line: {
-                    color: "#6366f1",
-                    width: 1.5,
+                    color: "#C69A2B",
+                    width: 1.2,
                     dash: "dot"
                 },
                 layer: "below"
@@ -146,11 +146,11 @@ function renderMareyChart() {
                 showarrow: false,
                 font: {
                     family: "JetBrains Mono, monospace",
-                    size: 9.5,
-                    color: "#312e81"
+                    size: 9,
+                    color: "#242424"
                 },
-                bgcolor: "rgba(255, 255, 255, 0.95)",
-                bordercolor: "#c7d2fe",
+                bgcolor: "#FAF9F4",
+                bordercolor: "#D4D0C5",
                 borderwidth: 1,
                 borderpad: 3
             });
@@ -168,7 +168,7 @@ function renderMareyChart() {
             y0: 0,
             y1: 440,
             line: {
-                color: "#dc2626",
+                color: "#C94F4F",
                 width: 1.5,
                 dash: "dashdot"
             }
@@ -178,9 +178,9 @@ function renderMareyChart() {
             y: 430,
             text: "NOW (IST)",
             showarrow: false,
-            font: { family: "JetBrains Mono", size: 8, color: "#dc2626" },
-            bgcolor: "#ffffff",
-            bordercolor: "#dc2626",
+            font: { family: "JetBrains Mono", size: 8, color: "#C94F4F" },
+            bgcolor: "#FAF9F4",
+            bordercolor: "#C94F4F",
             borderwidth: 1
         });
     }
@@ -192,31 +192,31 @@ function renderMareyChart() {
         title: false,
         margin: { l: 85, r: 30, t: 20, b: 50 },
         height: 520,
-        paper_bgcolor: "#ffffff",
-        plot_bgcolor: "#ffffff",
+        paper_bgcolor: "#FAF9F4",
+        plot_bgcolor: "#F3F0E7",
         xaxis: {
             title: {
                 text: "Time of Day (Hours IST - 24H Timeline)",
-                font: { family: "Inter, sans-serif", size: 11, color: "#475569" }
+                font: { family: "Inter, sans-serif", size: 11, color: "#6D6D68" }
             },
             range: [0, 24],
             dtick: 2,
             tickformat: "%02d:00",
-            gridcolor: "#f1f5f9",
+            gridcolor: "rgba(212, 208, 197, 0.7)",
             zeroline: false,
-            tickfont: { family: "JetBrains Mono, monospace", size: 10, color: "#64748b" }
+            tickfont: { family: "JetBrains Mono, monospace", size: 10, color: "#6D6D68" }
         },
         yaxis: {
             title: {
                 text: "Corridor Stations & Chainage (KM)",
-                font: { family: "Inter, sans-serif", size: 11, color: "#475569" }
+                font: { family: "Inter, sans-serif", size: 11, color: "#6D6D68" }
             },
             tickmode: "array",
             tickvals: stationVals,
             ticktext: stationTicks.map((st, i) => `<b>${st}</b> (${stationVals[i]}k)`),
             range: [450, -10],
-            gridcolor: "#f1f5f9",
-            tickfont: { family: "JetBrains Mono, monospace", size: 9.5, color: "#334155" }
+            gridcolor: "rgba(212, 208, 197, 0.7)",
+            tickfont: { family: "JetBrains Mono, monospace", size: 9.5, color: "#242424" }
         },
         shapes: shapes,
         annotations: annotations,

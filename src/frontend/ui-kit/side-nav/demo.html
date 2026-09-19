@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Side Nav · UI Kit Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./side-nav.css">
+<style>
+    :root {
+        --bg-base: #f8fafc;
+        --bg-surface: #ffffff;
+        --bg-surface-subtle: #f1f5f9;
+        --border-color: #e2e8f0;
+        --text-primary: #0f172a;
+        --text-muted: #64748b;
+        --text-subtle: #94a3b8;
+        --color-primary: #0f2b5c;
+        --color-blue: #2563eb;
+        --color-amber: #d97706;
+        --color-crimson: #dc2626;
+        --color-emerald: #059669;
+        --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: var(--font-main);
+        background: var(--bg-base);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+    }
+    .demo-wrap { padding: 40px 48px 80px; padding-left: 130px; max-width: 1100px; }
+    h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; }
+    .sub { color: var(--text-muted); font-size: 0.85rem; margin-top: 6px; }
+    .card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 20px 22px;
+        margin-top: 22px;
+        box-shadow: 0 1px 4px rgba(15,23,42,.05);
+    }
+    .card h2 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-subtle); margin-bottom: 14px; }
+    .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+    button.demo {
+        font-family: inherit; font-size: 0.78rem; font-weight: 600;
+        padding: 8px 13px; border-radius: 8px; cursor: pointer;
+        border: 1px solid var(--border-color); background: #fff; color: var(--text-primary);
+        transition: .15s;
+    }
+    button.demo:hover { border-color: var(--color-blue); color: var(--color-blue); }
+    code { font-family: var(--font-mono); font-size: 0.78rem; background: var(--bg-surface-subtle); padding: 2px 6px; border-radius: 5px; }
+    pre { font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.6; background: #0f172a; color: #e2e8f0; padding: 16px 18px; border-radius: 10px; overflow-x: auto; margin-top: 12px; }
+    .note { font-size: 0.8rem; color: var(--text-muted); line-height: 1.65; }
+    .note + .note { margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="demo-wrap">
+    <h1>Floating Side Nav</h1>
+    <p class="sub">Hover the rail on the left. Groups expand into subpages; collapsed, they open as flyouts. Pin it with the tab on the panel edge.</p>
+
+    <div class="card">
+        <h2>Live controls</h2>
+        <div class="btns">
+            <button class="demo" onclick="nav.toggle()">toggle()</button>
+            <button class="demo" onclick="nav.togglePinned()">togglePinned()</button>
+            <button class="demo" onclick="nav.setActive('corridor-marey')">setActive('corridor-marey')</button>
+            <button class="demo" onclick="nav.setActive('demand-pending')">setActive('demand-pending')</button>
+            <button class="demo" onclick="nav.updateItem('demands', { badge: String(1 + Math.floor(Math.random()*20)), badgeTone: 'danger' })">bump badge</button>
+            <button class="demo" onclick="nav.expand('schedule')">expand('schedule')</button>
+            <button class="demo" onclick="nav.collapse('schedule')">collapse('schedule')</button>
+            <button class="demo" onclick="swapSide()">flip side</button>
+            <button class="demo" onclick="swapTheme()">flip theme</button>
+            <button class="demo" onclick="loadPreset('tms')">preset: TMS</button>
+            <button class="demo" onclick="loadPreset('tdms')">preset: TDMS</button>
+            <button class="demo" onclick="loadPreset('smms')">preset: SMMS</button>
+            <button class="demo" onclick="loadPreset('occ')">preset: OCC</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Minimum integration</h2>
+<pre>&lt;link rel="stylesheet" href="/static/ui-kit/side-nav/side-nav.css"&gt;
+&lt;script src="/static/ui-kit/side-nav/side-nav.js"&gt;&lt;/script&gt;
+&lt;script src="/static/ui-kit/side-nav/nav.config.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const nav = SideNav.create(NAV_PRESETS.tms);
+&lt;/script&gt;</pre>
+        <p class="note" style="margin-top:14px;">Active page is derived from <code>location.pathname</code> (and <code>#hash</code> when the item carries one), so no per-page flag is needed.</p>
+    </div>
+
+    <div class="card">
+        <h2>Defining pages &amp; subpages</h2>
+<pre>{
+  id: 'corridor',                 // stable id — used by setActive/updateItem
+  label: 'Corridor View',
+  icon: 'map',                    // built-in name, raw &lt;svg&gt;, image URL, or emoji
+  defaultOpen: true,
+  children: [                     // ← subpages, nested to any depth
+    { id: 'corridor-map',   label: 'Network Map',   href: '/#corridor-map' },
+    { id: 'corridor-marey', label: 'Marey Diagram', href: '/#marey' }
+  ]
+}</pre>
+    </div>
+
+    <div class="card">
+        <h2>Scroll test</h2>
+        <p class="note">The panel keeps its own scroll and stays vertically centred against the viewport. This block just makes the page long enough to scroll.</p>
+        <div style="height: 900px;"></div>
+        <p class="note">End of page — the nav has not moved.</p>
+    </div>
+</div>
+
+<script src="./side-nav.js"></script>
+<script src="./nav.config.js"></script>
+<script>
+    var current = 'occ';
+    var side = 'left';
+    var theme = 'light';
+    var nav;
+
+    function build(presetName) {
+        if (nav) nav.destroy();
+        var cfg = Object.assign({}, NAV_PRESETS[presetName], {
+            side: side,
+            theme: theme,
+            activeMatch: 'none',        // demo runs off-route; pin the active item manually
+            activeId: presetName === 'occ' ? 'overview' : presetName + '-home',
+            storageKey: null            // don't persist demo state
+        });
+        nav = SideNav.create(cfg);
+        window.nav = nav;
+        document.querySelector('.demo-wrap').style.paddingLeft = side === 'left' ? '130px' : '48px';
+        document.querySelector('.demo-wrap').style.paddingRight = side === 'right' ? '130px' : '48px';
+    }
+
+    function loadPreset(name) { current = name; build(name); }
+    function swapSide() { side = side === 'left' ? 'right' : 'left'; build(current); }
+    function swapTheme() { theme = theme === 'light' ? 'dark' : 'light'; build(current); }
+
+    build(current);
+</script>
+</body>
+</html>

@@ -11,10 +11,12 @@ Covers the three things the map cannot be wrong about:
    OCC does not know about, or drop safety flags.
 """
 
+import copy
 import json
 import os
 import sys
 import unittest
+from unittest import mock
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
@@ -103,6 +105,23 @@ REQUIRED_FIELDS = ("id", "layer", "lat", "lng", "bearing", "line",
                    "km_start", "km_end", "severity", "title", "subtitle", "detail")
 
 
+def staged_demands():
+    """
+    The demand file only holds whatever the running simulation happens to have
+    reached, so a test that needs a requisition at a particular stage has to put
+    one there. Real records are re-staged rather than invented, which keeps every
+    field the layers read authentic.
+    """
+    records = copy.deepcopy(layers.sim_state.read_demands())
+    if not records:
+        raise unittest.SkipTest("no demand records to re-stage")
+
+    wanted = ["PENDING_SANCTION", "APPROVED_SHADOW_BLOCK", "IN_PROGRESS"]
+    for i, d in enumerate(records):
+        d["status"] = wanted[i % len(wanted)]
+    return records
+
+
 class TestMapLayers(unittest.TestCase):
 
     def _assert_renderable(self, feature, layer_name):
@@ -116,8 +135,13 @@ class TestMapLayers(unittest.TestCase):
         self.assertTrue(77.0 < feature["lng"] < 81.0, f"{layer_name}: longitude off corridor")
 
     def test_every_layer_yields_renderable_features(self):
-        result = layers.build_layers("ALL")
+        # Asks for every builder by name rather than leaning on a preset: the
+        # OCC preset is now deliberately narrow, so driving this off "ALL" would
+        # quietly stop exercising the layers that preset no longer carries.
+        every = sorted(layers.LAYER_BUILDERS)
+        result = layers.build_layers("ALL", names=every)
         self.assertNotIn("errors", result, f"layer build reported errors: {result.get('errors')}")
+        self.assertEqual(sorted(result["layers"]), every)
 
         for name, features in result["layers"].items():
             for feature in features:
@@ -148,6 +172,64 @@ class TestMapLayers(unittest.TestCase):
         for f in layers.powercuts_layer("ALL"):
             self.assertIn(f["id"], block_ids)
             self.assertTrue(f["detail"]["power_block_required"])
+
+    def test_occ_preset_carries_no_ground_level_layer(self):
+        """
+        The OCC master desk sanctions blocks; it does not triage defects. Its map
+        must therefore stay clear of the departments' ground-level intelligence -
+        field reports awaiting a department's own review, routine dues, asset
+        wear and track health - all of which live on the portal maps instead.
+        """
+        occ = layers.PORTAL_LAYER_PRESETS["ALL"]
+        self.assertEqual(occ, ["demands", "blocks"])
+        for ground in ("issues", "routines", "assets", "health"):
+            self.assertNotIn(ground, occ)
+
+        # ...and the portals must keep the layers the OCC gave up.
+        portal_layers = set()
+        for dept, names in layers.PORTAL_LAYER_PRESETS.items():
+            if dept != "ALL":
+                portal_layers.update(names)
+        self.assertTrue({"issues", "routines", "assets", "health"} <= portal_layers)
+
+    def test_a_demand_is_on_exactly_one_of_the_two_occ_layers(self):
+        """
+        The OCC map mirrors its two columns: INCOMING is `demands`, IN EXECUTION
+        is `blocks`. They filter on disjoint status sets, so a requisition is
+        plotted once and moves between layers as it is sanctioned - it is never
+        drawn twice and never disappears mid-lifecycle.
+        """
+        staged = staged_demands()
+        with mock.patch.object(layers.sim_state, "read_demands", return_value=staged):
+            demands = layers.demands_layer("ALL")
+            blocks = layers.blocks_layer("ALL")
+
+        self.assertTrue(demands, "staging should have queued a requisition")
+        self.assertTrue(blocks, "staging should have sanctioned a block")
+
+        self.assertFalse({f["id"] for f in demands} & {f["id"] for f in blocks})
+        for f in demands:
+            self.assertEqual(f["detail"]["status"], "PENDING_SANCTION")
+        for f in blocks:
+            self.assertIn(f["detail"]["status"], layers.BLOCK_STATUSES)
+
+    def test_demands_carry_what_the_occ_popup_shows(self):
+        """The popup and its 'Show in queue' action read the feature, not a refetch."""
+        staged = staged_demands()
+        with mock.patch.object(layers.sim_state, "read_demands", return_value=staged):
+            features = layers.demands_layer("ALL")
+        self.assertTrue(features, "staging should have queued a requisition")
+
+        for f in features:
+            self._assert_renderable(f, "demands")
+            self.assertTrue(len(f["path"]) > 1, f"demand {f['id']} has no span to stroke")
+            d = f["detail"]
+            for field in ("demand_id", "section", "duration_requested_min",
+                          "priority", "machine_required", "gang_crew",
+                          "department_label", "description"):
+                self.assertIn(field, d, f"demand {f['id']} popup cannot show '{field}'")
+            # 'Show in queue' finds the INCOMING card by this id exactly.
+            self.assertEqual(f["id"], d["demand_id"])
 
     def test_issues_carry_what_the_block_request_form_needs(self):
         """

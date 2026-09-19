@@ -1,0 +1,662 @@
+/* ==========================================================================
+   UI-KIT · FLOATING SIDE-MOUNTED NAV BAR  (side-nav)
+   Zero-dependency. Config-driven pages + subpages.
+   Pairs with side-nav.js — see side-nav.md
+   --------------------------------------------------------------------------
+   Everything is namespaced under .sn-* so it can be dropped into any page
+   without colliding with existing portal styles. All colours read from
+   --sn-* variables, which fall back to the host page's design tokens.
+   ========================================================================== */
+
+/* The flyout is portalled to <body>, outside .sn-root, so it must carry the
+   same token definitions or it renders unstyled. */
+.sn-root,
+.sn-flyout {
+    /* ---- Surface -------------------------------------------------------- */
+    --sn-surface: var(--bg-surface, #ffffff);
+    --sn-surface-2: var(--bg-surface-subtle, #f1f5f9);
+    --sn-hover: rgba(15, 23, 42, 0.055);
+    --sn-border: var(--border-color, #e2e8f0);
+    --sn-border-soft: rgba(15, 23, 42, 0.07);
+
+    /* ---- Ink ------------------------------------------------------------ */
+    --sn-text: var(--text-primary, #0f172a);
+    --sn-text-dim: var(--text-muted, #64748b);
+    --sn-text-faint: var(--text-subtle, #94a3b8);
+
+    /* ---- Accent (per-instance overridable) ------------------------------ */
+    --sn-accent: var(--color-primary, #0f2b5c);
+    --sn-accent-ink: var(--color-blue, #2563eb);
+    --sn-accent-wash: rgba(37, 99, 235, 0.09);
+    --sn-accent-edge: rgba(37, 99, 235, 0.22);
+    --sn-on-accent: #ffffff;
+
+    /* ---- Geometry ------------------------------------------------------- */
+    --sn-w: 250px;
+    --sn-rail: 58px;
+    --sn-radius: 16px;
+    --sn-row-radius: 9px;
+    --sn-row-h: 38px;
+    --sn-pad: 8px;
+    --sn-indent: 16px;
+    --sn-gap: 2px;
+    --sn-offset: 16px;
+
+    /* ---- Elevation ------------------------------------------------------ */
+    --sn-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.05),
+        0 2px 6px rgba(15, 23, 42, 0.05),
+        0 14px 34px -10px rgba(15, 23, 42, 0.2);
+    --sn-shadow-flyout:
+        0 0 0 1px rgba(15, 23, 42, 0.06),
+        0 10px 30px -8px rgba(15, 23, 42, 0.25);
+
+    /* ---- Motion (spring-ish easing, mirrors the file-tree reference) ----- */
+    --sn-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --sn-ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+    --sn-dur: 280ms;
+    --sn-dur-fast: 160ms;
+
+    --sn-font: var(--font-main, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    --sn-font-mono: var(--font-mono, 'JetBrains Mono', ui-monospace, monospace);
+}
+
+.sn-root {
+    position: fixed;
+    z-index: 900;
+    font-family: var(--sn-font);
+    display: flex;
+    align-items: stretch;
+    pointer-events: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Dark surface variant --------------------------------------------------- */
+.sn-root[data-theme="dark"],
+.sn-flyout[data-theme="dark"] {
+    --sn-surface: #0f172a;
+    --sn-surface-2: #1e293b;
+    --sn-hover: rgba(255, 255, 255, 0.075);
+    --sn-border: rgba(255, 255, 255, 0.1);
+    --sn-border-soft: rgba(255, 255, 255, 0.09);
+    --sn-text: #f1f5f9;
+    --sn-text-dim: #94a3b8;
+    --sn-text-faint: #64748b;
+    --sn-accent-ink: #60a5fa;
+    --sn-accent-wash: rgba(96, 165, 250, 0.14);
+    --sn-accent-edge: rgba(96, 165, 250, 0.3);
+    --sn-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 16px 40px -12px rgba(0, 0, 0, 0.7);
+    --sn-shadow-flyout:
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 14px 34px -10px rgba(0, 0, 0, 0.75);
+}
+
+/* ---- Anchoring -----------------------------------------------------------
+   The root spans the usable viewport height and centres the panel with flex.
+   It deliberately uses NO transform: a transformed ancestor would become the
+   containing block for the position:fixed scrim and FAB inside it.
+   -------------------------------------------------------------------------- */
+.sn-root {
+    top: var(--sn-offset);
+    bottom: var(--sn-offset);
+}
+
+.sn-root[data-side="left"]  { left: var(--sn-offset); }
+.sn-root[data-side="right"] { right: var(--sn-offset); }
+
+.sn-root[data-align="center"]  { align-items: center; }
+.sn-root[data-align="top"]     { align-items: flex-start; }
+.sn-root[data-align="bottom"]  { align-items: flex-end; }
+.sn-root[data-align="stretch"] { align-items: stretch; }
+
+/* ==========================================================================
+   Panel
+   ========================================================================== */
+.sn-panel {
+    pointer-events: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: var(--sn-rail);
+    max-height: 100%;
+    background: var(--sn-surface);
+    border-radius: var(--sn-radius);
+    box-shadow: var(--sn-shadow);
+    overflow: hidden;
+    transition:
+        width var(--sn-dur) var(--sn-ease),
+        box-shadow var(--sn-dur) var(--sn-ease);
+    will-change: width;
+}
+
+.sn-root[data-align="stretch"] .sn-panel { height: 100%; }
+.sn-root[data-open="true"] .sn-panel { width: var(--sn-w); }
+
+/* ==========================================================================
+   Brand / header
+   ========================================================================== */
+.sn-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    min-height: 56px;
+    border-bottom: 1px solid var(--sn-border-soft);
+    flex-shrink: 0;
+    text-decoration: none;
+    color: inherit;
+}
+
+.sn-brand-crest {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    background: var(--sn-accent);
+    color: var(--sn-on-accent);
+    display: grid;
+    place-items: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    overflow: hidden;
+}
+
+.sn-brand-crest svg { width: 18px; height: 18px; }
+.sn-brand-crest img { width: 100%; height: 100%; object-fit: cover; }
+
+.sn-brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.sn-brand-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--sn-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sn-brand-sub {
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--sn-text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   Scroll body + the sliding hover highlight
+   ========================================================================== */
+.sn-scroll {
+    position: relative;
+    isolation: isolate;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--sn-pad);
+    scrollbar-width: thin;
+    scrollbar-color: var(--sn-border) transparent;
+    overscroll-behavior: contain;
+}
+
+.sn-scroll::-webkit-scrollbar { width: 6px; }
+.sn-scroll::-webkit-scrollbar-thumb {
+    background: var(--sn-border);
+    border-radius: 99px;
+}
+.sn-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* One highlight element that springs between rows. */
+.sn-highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    border-radius: var(--sn-row-radius);
+    background: var(--sn-hover);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(0, 0, 0);
+    transition:
+        transform var(--sn-dur) var(--sn-ease),
+        width var(--sn-dur) var(--sn-ease),
+        height var(--sn-dur) var(--sn-ease),
+        opacity var(--sn-dur-fast) linear;
+    will-change: transform, width, height;
+}
+.sn-highlight[data-visible="true"] { opacity: 1; }
+/* When the highlight first appears it should not slide in from 0,0. */
+.sn-highlight[data-warp="true"] { transition: opacity var(--sn-dur-fast) linear; }
+
+/* ==========================================================================
+   Rows
+   ========================================================================== */
+.sn-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sn-gap);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sn-item { position: relative; }
+
+.sn-row {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: var(--sn-row-h);
+    padding: 6px 8px;
+    border: 0;
+    border-radius: var(--sn-row-radius);
+    background: transparent;
+    color: var(--sn-text-dim);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--sn-dur-fast) var(--sn-ease-soft);
+}
+
+.sn-row:focus-visible {
+    outline: 2px solid var(--sn-accent-ink);
+    outline-offset: -2px;
+}
+
+.sn-row:hover { color: var(--sn-text); }
+
+.sn-row[aria-disabled="true"] {
+    opacity: 0.42;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Active page ------------------------------------------------------------- */
+.sn-row[data-active="true"] {
+    color: var(--sn-accent-ink);
+    font-weight: 650;
+    background: var(--sn-accent-wash);
+    box-shadow: inset 0 0 0 1px var(--sn-accent-edge);
+}
+
+.sn-row[data-active="true"] .sn-icon { color: var(--sn-accent-ink); }
+
+/* Trail marker for a group that holds the active page. */
+.sn-row[data-active-within="true"] .sn-icon { color: var(--sn-accent-ink); }
+
+.sn-icon {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    color: var(--sn-text-faint);
+    transition: color var(--sn-dur-fast) var(--sn-ease-soft);
+}
+
+.sn-icon svg { width: 17px; height: 17px; stroke-width: 1.9; }
+.sn-icon img { width: 17px; height: 17px; object-fit: contain; }
+.sn-icon-glyph { font-size: 0.86rem; line-height: 1; }
+
+.sn-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Text elements fade out as the rail collapses. */
+.sn-label,
+.sn-badge,
+.sn-meta,
+.sn-chev,
+.sn-brand-text,
+.sn-section-label {
+    opacity: 1;
+    transition: opacity var(--sn-dur-fast) var(--sn-ease-soft);
+}
+
+.sn-root[data-open="false"] .sn-label,
+.sn-root[data-open="false"] .sn-badge,
+.sn-root[data-open="false"] .sn-meta,
+.sn-root[data-open="false"] .sn-chev,
+.sn-root[data-open="false"] .sn-brand-text,
+.sn-root[data-open="false"] .sn-section-label {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sn-badge {
+    flex: 0 0 auto;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 99px;
+    background: var(--sn-accent-ink);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    font-family: var(--sn-font-mono);
+    display: grid;
+    place-items: center;
+    letter-spacing: 0.02em;
+}
+
+.sn-badge[data-tone="warn"]   { background: var(--color-amber, #d97706); }
+.sn-badge[data-tone="danger"] { background: var(--color-crimson, #dc2626); }
+.sn-badge[data-tone="ok"]     { background: var(--color-emerald, #059669); }
+.sn-badge[data-tone="muted"]  { background: var(--sn-surface-2); color: var(--sn-text-dim); }
+
+.sn-meta {
+    flex: 0 0 auto;
+    font-size: 0.66rem;
+    font-family: var(--sn-font-mono);
+    color: var(--sn-text-faint);
+}
+
+/* A dot stands in for the badge while the rail is collapsed. */
+.sn-dot {
+    position: absolute;
+    top: 4px;
+    left: 25px;
+    width: 7px;
+    height: 7px;
+    border-radius: 99px;
+    background: var(--sn-accent-ink);
+    box-shadow: 0 0 0 2px var(--sn-surface);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--sn-dur-fast) var(--sn-ease-soft);
+}
+.sn-dot[data-tone="warn"]   { background: var(--color-amber, #d97706); }
+.sn-dot[data-tone="danger"] { background: var(--color-crimson, #dc2626); }
+.sn-dot[data-tone="ok"]     { background: var(--color-emerald, #059669); }
+.sn-root[data-open="false"] .sn-dot { opacity: 1; }
+
+/* Chevron ----------------------------------------------------------------- */
+.sn-chev {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    color: var(--sn-text-faint);
+    transform: rotate(0deg);
+    transition: transform var(--sn-dur) var(--sn-ease);
+}
+.sn-chev svg { width: 14px; height: 14px; stroke-width: 2.2; }
+.sn-item[data-expanded="true"] > .sn-row .sn-chev { transform: rotate(90deg); }
+
+/* ==========================================================================
+   Nested subpages
+   ========================================================================== */
+.sn-children {
+    position: relative;
+    margin-left: calc(var(--sn-indent) + 3px);
+    padding-left: 9px;
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+        height var(--sn-dur) var(--sn-ease),
+        opacity var(--sn-dur) var(--sn-ease);
+}
+
+/* Indent guide, as in the file-tree reference. */
+.sn-children::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 2px;
+    bottom: 2px;
+    width: 1px;
+    background: var(--sn-border);
+}
+
+.sn-item[data-expanded="true"] > .sn-children { opacity: 1; }
+.sn-children > .sn-list { padding: 2px 0; }
+
+/* Deeper levels get a lighter touch. */
+.sn-children .sn-row { font-size: 0.775rem; min-height: 32px; }
+.sn-children .sn-icon { width: 18px; height: 18px; }
+.sn-children .sn-icon svg { width: 15px; height: 15px; }
+
+/* Subpages are hidden while the rail is collapsed — they surface in the
+   flyout instead. */
+.sn-root[data-open="false"] .sn-children { display: none; }
+
+/* ==========================================================================
+   Section headings & dividers
+   ========================================================================== */
+.sn-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 10px 5px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--sn-text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sn-section-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sn-root[data-open="false"] .sn-section { padding: 10px 10px 6px; }
+.sn-root[data-open="false"] .sn-section::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--sn-border);
+}
+
+.sn-divider {
+    height: 1px;
+    margin: 7px 6px;
+    background: var(--sn-border-soft);
+}
+
+/* ==========================================================================
+   Footer + collapse control
+   ========================================================================== */
+.sn-footer {
+    flex-shrink: 0;
+    padding: var(--sn-pad);
+    border-top: 1px solid var(--sn-border-soft);
+    position: relative;
+    isolation: isolate;
+}
+
+.sn-toggle {
+    position: absolute;
+    top: 50%;
+    width: 22px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid var(--sn-border);
+    background: var(--sn-surface);
+    color: var(--sn-text-dim);
+    border-radius: 7px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    pointer-events: auto;
+    box-shadow: var(--sn-shadow-flyout);
+    opacity: 0;
+    transform: translateY(-50%) scale(0.85);
+    transition:
+        opacity var(--sn-dur-fast) var(--sn-ease-soft),
+        transform var(--sn-dur-fast) var(--sn-ease),
+        color var(--sn-dur-fast) var(--sn-ease-soft);
+    z-index: 2;
+}
+
+.sn-root[data-side="left"]  .sn-toggle { right: -11px; }
+.sn-root[data-side="right"] .sn-toggle { left: -11px; }
+
+.sn-root:hover .sn-toggle,
+.sn-toggle:focus-visible {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+.sn-toggle:hover { color: var(--sn-accent-ink); border-color: var(--sn-accent-edge); }
+.sn-toggle svg {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2.2;
+    transition: transform var(--sn-dur) var(--sn-ease);
+}
+
+.sn-root[data-side="left"][data-pinned="true"]   .sn-toggle svg { transform: rotate(180deg); }
+.sn-root[data-side="right"][data-pinned="false"] .sn-toggle svg { transform: rotate(180deg); }
+
+/* ==========================================================================
+   Flyout (collapsed rail → label + subpages on hover)
+   ========================================================================== */
+.sn-flyout {
+    position: fixed;
+    z-index: 1000;
+    min-width: 186px;
+    max-width: 268px;
+    max-height: 62vh;
+    overflow-y: auto;
+    padding: 6px;
+    background: var(--sn-surface);
+    border-radius: 12px;
+    box-shadow: var(--sn-shadow-flyout);
+    font-family: var(--sn-font);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-6px) scale(0.97);
+    transform-origin: left center;
+    transition:
+        opacity var(--sn-dur-fast) var(--sn-ease-soft),
+        transform var(--sn-dur-fast) var(--sn-ease);
+}
+
+.sn-flyout[data-side="right"] {
+    transform: translateX(6px) scale(0.97);
+    transform-origin: right center;
+}
+
+.sn-flyout[data-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0) scale(1);
+}
+
+.sn-flyout-title {
+    padding: 7px 9px 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--sn-text);
+    border-bottom: 1px solid var(--sn-border-soft);
+    margin-bottom: 4px;
+}
+
+.sn-flyout .sn-row { font-size: 0.775rem; min-height: 32px; }
+.sn-flyout .sn-row:hover { background: var(--sn-hover); }
+.sn-flyout .sn-label { opacity: 1; }
+
+/* ==========================================================================
+   Small screens → floating button + drawer
+   ========================================================================== */
+.sn-fab {
+    position: fixed;
+    bottom: calc(var(--sn-offset) + 4px);
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--sn-accent);
+    color: var(--sn-on-accent);
+    display: none;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: var(--sn-shadow);
+    z-index: 1001;
+}
+.sn-fab svg { width: 19px; height: 19px; stroke-width: 2.2; }
+.sn-root[data-side="left"]  .sn-fab { left: var(--sn-offset); }
+.sn-root[data-side="right"] .sn-fab { right: var(--sn-offset); }
+
+.sn-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--sn-dur) var(--sn-ease-soft);
+    z-index: 899;
+}
+.sn-scrim[data-visible="true"] { opacity: 1; pointer-events: auto; }
+
+@media (max-width: 860px) {
+    .sn-root[data-compact="true"] { pointer-events: none; }
+    .sn-root[data-compact="true"] .sn-fab { display: grid; pointer-events: auto; }
+    .sn-root[data-compact="true"] .sn-panel {
+        position: fixed;
+        top: var(--sn-offset);
+        bottom: calc(var(--sn-offset) + 60px);
+        max-height: none;
+        width: min(var(--sn-w), calc(100vw - 32px));
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(-14px) scale(0.97);
+        transition:
+            opacity var(--sn-dur) var(--sn-ease-soft),
+            transform var(--sn-dur) var(--sn-ease);
+    }
+    .sn-root[data-compact="true"][data-side="left"]  .sn-panel { left: var(--sn-offset); }
+    .sn-root[data-compact="true"][data-side="right"] .sn-panel {
+        right: var(--sn-offset);
+        transform: translateX(14px) scale(0.97);
+    }
+    .sn-root[data-compact="true"][data-open="true"] .sn-panel {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0) scale(1);
+    }
+    .sn-root[data-compact="true"] .sn-toggle { display: none; }
+    .sn-root[data-compact="true"] .sn-flyout { display: none; }
+}
+
+/* ==========================================================================
+   Page offset helper — add to a wrapper when the nav should push content
+   instead of floating over it.
+   ========================================================================== */
+.sn-page-offset { transition: padding var(--sn-dur, 280ms) cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* ==========================================================================
+   Reduced motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    .sn-root *,
+    .sn-flyout * {
+        transition-duration: 1ms !important;
+        animation-duration: 1ms !important;
+    }
+}

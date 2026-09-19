@@ -21,12 +21,12 @@ let reviewConfig = {
 // ---------------------------------------------------------------------------
 
 const DEMAND_STATUS_META = {
-    PENDING_SANCTION:      { cls: "status-pending",    text: "&#128992; PENDING OCC SANCTION" },
-    APPROVED_SHADOW_BLOCK: { cls: "status-approved",   text: "&#128994; APPROVED SHADOW BLOCK" },
-    IN_PROGRESS:           { cls: "status-inprogress", text: "&#128679; BLOCK UNDER EXECUTION" },
-    COMPLETED:             { cls: "status-completed",  text: "&#127937; COMPLETED" },
-    CANCELLED:             { cls: "status-cancelled",  text: "&#128680; WITHDRAWN BY CONTROL" },
-    DEFERRED_NEXT_CYCLE:   { cls: "status-deferred",   text: "&#9203; DEFERRED - NO WINDOW" }
+    PENDING_SANCTION:      { cls: "status-pending",    text: "&bull; PENDING OCC SANCTION" },
+    APPROVED_SHADOW_BLOCK: { cls: "status-approved",   text: "&bull; APPROVED SHADOW BLOCK" },
+    IN_PROGRESS:           { cls: "status-inprogress", text: "&bull; BLOCK IN EXECUTION" },
+    COMPLETED:             { cls: "status-completed",  text: "&bull; COMPLETED" },
+    CANCELLED:             { cls: "status-cancelled",  text: "&bull; WITHDRAWN BY CONTROL" },
+    DEFERRED_NEXT_CYCLE:   { cls: "status-deferred",   text: "&bull; DEFERRED - NO WINDOW" }
 };
 
 function demandStatusBadge(status) {

@@ -1,0 +1,52 @@
+{
+  "name": "@railways/corridor-strip",
+  "version": "1.0.0",
+  "description": "Full-width corridor schematic strip for the OCC dashboard — two rails, station anchors, and live block requests at their true chainage.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "files": ["dist", "README.md"],
+  "main": "./dist/corridor-strip.cjs",
+  "module": "./dist/corridor-strip.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/corridor-strip.js",
+      "require": "./dist/corridor-strip.cjs"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./style.css": "./dist/corridor-strip.css",
+    "./dist/*": "./dist/*"
+  },
+  "sideEffects": ["*.css"],
+  "scripts": {
+    "build": "npm run build:lib && npm run build:served && npm run build:types",
+    "build:lib": "vite build",
+    "build:served": "vite build --config vite.config.iife.ts",
+    "build:types": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "dev": "vite build --watch"
+  },
+  "peerDependencies": {
+    "gsap": ">=3.12.0",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true },
+    "react-dom": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "gsap": "^3.13.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "~5.9.3",
+    "vite": "^8.2.2"
+  }
+}

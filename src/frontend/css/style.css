@@ -2461,19 +2461,9 @@ body {
     gap: 12px;
 }
 
-.exec-card {
-    border: 1px solid var(--border-color);
-    border-left: 4px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 11px 13px;
-    background: #ffffff;
-}
-
-.exec-card-scheduled   { border-left-color: #94a3b8; }
-.exec-card-inprogress  { border-left-color: var(--color-blue, #2563eb); }
-.exec-card-completed   { border-left-color: var(--color-emerald); }
-.exec-card-cancelled   { border-left-color: var(--color-crimson); }
-.exec-card-deferred    { border-left-color: #d97706; }
+/* .exec-card and its per-status left-border colours are defined in the OCC
+   CONTROL-ROOM BOARD section at the end of this file. Status now reads from the
+   dot, the badge and (while running) the pulsing inset edge. */
 
 .exec-card-top {
     display: flex;
@@ -2555,4 +2545,538 @@ body {
 .exec-summary-chip strong {
     font-family: var(--font-mono);
     color: var(--text-primary, #0f172a);
+}
+
+
+/* ==========================================================================
+   OCC CONTROL-ROOM BOARD
+   The landing screen is read at a glance, under load, for a whole shift. It
+   trades the old airy card stack for one slim header, a hard-contrast ground
+   and a fixed two-zone split, with motion carrying every arrival and state
+   change so nothing important changes silently.
+   ========================================================================== */
+
+:root {
+    /* Contrast pass. Same palette family, strengthened where it was failing:
+       the old #f8fafc ground against #ffffff cards with #e2e8f0 borders gave
+       almost no separation, so nothing announced itself. */
+    --occ-ground: #e9eef5;
+    --occ-rule: #cbd5e1;
+    --occ-edge: #94a3b8;
+    --occ-body: #475569;
+
+    --occ-header-h: 44px;
+    --occ-kpi-h: 26px;
+    --occ-tabs-h: 46px;
+}
+
+/* -- Slim control bar ---------------------------------------------------- */
+
+.app-header {
+    height: var(--occ-header-h);
+    padding: 0 16px;
+    gap: 14px;
+    justify-content: flex-start;
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.hdr-brand { display: flex; align-items: center; gap: 9px; }
+
+.app-header .railway-crest {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 5px;
+    font-size: 0.69rem;
+    font-weight: 800;
+}
+
+.hdr-title {
+    font-size: 0.81rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.hdr-sep { width: 1px; height: 20px; background: var(--occ-rule); flex: none; }
+.hdr-spacer { flex-grow: 1; }
+
+.hdr-corridor {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.hdr-clock {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.hdr-clock em {
+    font-style: normal;
+    font-family: var(--font-main);
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+}
+
+.hdr-portals { display: flex; align-items: center; gap: 5px; }
+
+.hdr-portal {
+    height: 24px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: filter 0.15s ease;
+}
+
+.hdr-portal:hover { filter: brightness(0.95); }
+
+.hdr-portal-tms  { background: var(--dept-track-bg); border: 1px solid var(--dept-track-border); color: var(--dept-track-text); }
+.hdr-portal-tdms { background: var(--dept-ohe-bg);   border: 1px solid var(--dept-ohe-border);   color: var(--dept-ohe-text); }
+.hdr-portal-smms { background: var(--dept-sig-bg);   border: 1px solid var(--dept-sig-border);   color: var(--dept-sig-text); }
+
+.hdr-icons { display: flex; align-items: center; gap: 4px; }
+
+.hdr-icon {
+    width: 26px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    border: 1px solid var(--occ-rule);
+    background: var(--bg-surface);
+    color: var(--occ-body);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.hdr-icon:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
+
+/* -- KPI line ------------------------------------------------------------ */
+
+.kpi-line {
+    height: var(--occ-kpi-h);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    background: var(--bg-surface-subtle);
+    border-bottom: 1px solid var(--occ-rule);
+}
+
+.kpi-item {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding-right: 18px;
+    margin-right: 18px;
+    border-right: 1px solid var(--occ-rule);
+    white-space: nowrap;
+}
+
+.kpi-k {
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.kpi-v { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; }
+
+.kpi-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: var(--occ-body);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.kpi-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-blue); }
+
+/* -- The split ----------------------------------------------------------- */
+
+.occ-split {
+    height: calc(100vh - var(--occ-header-h) - var(--occ-kpi-h) - var(--occ-tabs-h));
+    min-height: 480px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    background: var(--occ-ground);
+}
+
+.occ-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.occ-col:first-child { border-right: 2px solid var(--occ-edge); }
+
+.occ-col-head {
+    flex: none;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 14px;
+    background: var(--bg-surface);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.occ-col-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--color-primary);
+}
+
+.occ-col-count {
+    min-width: 20px;
+    height: 19px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-xs);
+    background: var(--color-primary);
+    color: var(--text-inverse);
+    font-family: var(--font-mono);
+    font-size: 0.69rem;
+    font-weight: 700;
+}
+
+.occ-col-body {
+    flex-grow: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 10px 14px;
+    background: var(--occ-ground);
+    scrollbar-width: thin;
+    scrollbar-color: var(--occ-edge) transparent;
+}
+
+.occ-col-body::-webkit-scrollbar { width: 8px; }
+.occ-col-body::-webkit-scrollbar-thumb { background: var(--occ-edge); border-radius: 4px; }
+
+.occ-col-empty {
+    padding: 22px 12px;
+    text-align: center;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}
+
+.occ-col-foot {
+    flex: none;
+    padding: 10px 14px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--occ-rule);
+}
+
+.occ-col-foot .btn-sanction-auto {
+    width: 100%;
+    height: 42px;
+    justify-content: center;
+    font-size: 0.79rem;
+    letter-spacing: 0.03em;
+    /* The bundler is the AI action on this screen, so it carries the AI-bundle
+       signature rather than the generic success green. */
+    background: var(--dept-bundle-text);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
+.occ-col-foot .btn-sanction-auto:hover:not(:disabled) { background: var(--color-indigo); }
+
+/* -- Incoming: demand rows ----------------------------------------------- */
+
+.demand-row {
+    display: flex;
+    background: var(--bg-surface);
+    border: 1px solid var(--occ-rule);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.demand-row:last-child { margin-bottom: 0; }
+
+.demand-accent { width: 4px; flex: none; transform-origin: top; }
+.demand-accent-tms  { background: var(--dept-track-text); }
+.demand-accent-tdms { background: var(--dept-ohe-text); }
+.demand-accent-smms { background: var(--dept-sig-text); }
+
+.demand-body { flex-grow: 1; padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+.demand-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.demand-line-2 { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+
+.demand-dept {
+    height: 17px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    font-size: 0.61rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    flex: none;
+}
+
+.demand-dept-tms  { background: var(--dept-track-bg); border: 1px solid var(--dept-track-border); color: var(--dept-track-text); }
+.demand-dept-tdms { background: var(--dept-ohe-bg);   border: 1px solid var(--dept-ohe-border);   color: var(--dept-ohe-text); }
+.demand-dept-smms { background: var(--dept-sig-bg);   border: 1px solid var(--dept-sig-border);   color: var(--dept-sig-text); }
+
+.demand-id { font-family: var(--font-mono); font-size: 0.71rem; font-weight: 700; color: var(--text-primary); }
+
+.demand-prio {
+    height: 17px;
+    padding: 0 7px;
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    color: var(--text-inverse);
+    font-size: 0.61rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    flex: none;
+}
+
+.demand-prio-critical { background: var(--color-crimson); }
+.demand-prio-high     { background: var(--color-amber); }
+.demand-prio-medium   { background: var(--color-blue); }
+.demand-prio-low      { background: var(--color-emerald); }
+
+.demand-section { font-family: var(--font-mono); font-size: 0.77rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; }
+.demand-defect  { font-size: 0.74rem; font-weight: 500; color: var(--occ-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.demand-dur     { font-family: var(--font-mono); font-size: 0.71rem; font-weight: 700; color: var(--text-primary); }
+.demand-meta    { font-size: 0.67rem; color: var(--occ-body); }
+.demand-meta-dim { font-size: 0.67rem; color: var(--text-muted); }
+
+.demand-flag {
+    height: 16px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    font-size: 0.61rem;
+    font-weight: 700;
+    flex: none;
+}
+
+.demand-flag-power { background: var(--dept-ohe-bg); border: 1px solid var(--dept-ohe-border); color: var(--dept-ohe-text); }
+.demand-flag-disc  { background: var(--dept-sig-bg); border: 1px solid var(--dept-sig-border); color: var(--dept-sig-text); }
+
+/* -- In execution: block cards ------------------------------------------- */
+
+.exec-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+    gap: 10px;
+}
+
+.exec-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--occ-rule);
+    border-left: 1px solid var(--occ-rule);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: transform 320ms cubic-bezier(.2, .8, .2, 1),
+                box-shadow 320ms ease, opacity 320ms ease;
+}
+
+.exec-card-completed,
+.exec-card-deferred { opacity: 0.78; }
+
+.exec-card-top { display: flex; align-items: center; gap: 7px; }
+
+.exec-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+
+.exec-card-id { font-family: var(--font-mono); font-size: 0.71rem; font-weight: 700; color: var(--text-primary); }
+
+.exec-status {
+    height: 17px;
+    padding: 0 7px;
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    flex: none;
+}
+
+/* Live states get a solid fill; resting states keep a tint. */
+.exec-status-inprogress { background: var(--color-blue);    color: var(--text-inverse); border: 1px solid var(--color-blue); }
+.exec-status-cancelled  { background: var(--color-crimson); color: var(--text-inverse); border: 1px solid var(--color-crimson); }
+.exec-status-scheduled  { background: var(--dept-bundle-bg); color: var(--dept-bundle-text); border: 1px solid var(--dept-bundle-border); }
+.exec-status-completed  { background: var(--dept-sig-bg);   color: var(--dept-sig-text);   border: 1px solid var(--dept-sig-border); }
+.exec-status-deferred   { background: var(--bg-surface-subtle); color: var(--occ-body); border: 1px solid var(--occ-rule); }
+
+.exec-card-title { font-size: 0.77rem; font-weight: 600; color: var(--text-primary); line-height: 1.25; }
+.exec-card-meta  { display: flex; align-items: baseline; gap: 8px; }
+.exec-card-sec   { font-family: var(--font-mono); font-size: 0.71rem; font-weight: 700; color: var(--text-secondary); }
+.exec-card-dept  { font-size: 0.67rem; color: var(--text-muted); }
+.exec-card-window { font-family: var(--font-mono); font-size: 0.71rem; font-weight: 600; color: var(--text-secondary); }
+.exec-card-window-dim { color: var(--text-subtle); }
+
+.exec-progress { display: flex; align-items: center; gap: 8px; }
+
+/* A display rule beats the UA's [hidden], so these have to say so themselves -
+   otherwise a sanctioned card shows an empty track filled edge to edge. */
+.exec-progress[hidden],
+.exec-card-note[hidden] { display: none !important; }
+
+.exec-progress-track {
+    flex-grow: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-color);
+    overflow: hidden;
+}
+
+.exec-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--color-blue);
+    transition: width 900ms cubic-bezier(.3, .7, .3, 1);
+}
+
+.exec-progress-fill.is-complete { background: var(--color-emerald); }
+
+.exec-progress-pct {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 700;
+    min-width: 30px;
+    text-align: right;
+}
+
+.exec-card-note {
+    font-size: 0.67rem;
+    line-height: 1.35;
+    border-top: 1px solid var(--border-color);
+    padding-top: 6px;
+}
+
+.exec-card-note-cancelled { color: var(--color-crimson); }
+.exec-card-note-deferred  { color: var(--dept-ohe-text); }
+
+.exec-tally { display: flex; align-items: center; gap: 5px; }
+
+.exec-tally-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 3px;
+    font-size: 0.61rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.exec-tally-chip strong { font-family: var(--font-mono); font-size: 0.64rem; font-weight: 700; }
+
+/* -- Motion ---------------------------------------------------------------
+   A demand arriving must be unmissable without being a distraction, and a
+   block changing state must carry its meaning in the transition. Both only
+   ever fire on genuine change - the renderers reconcile keyed DOM rather
+   than replacing innerHTML, so a poll with no news animates nothing. */
+
+.demand-row.is-arriving {
+    animation: occRowIn 240ms cubic-bezier(.2, .8, .2, 1) both,
+               occRowWash 2400ms ease-out both;
+}
+
+@keyframes occRowIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes occRowWash {
+    0%   { background: #fff7ed; box-shadow: 0 0 0 2px #fdba74; }
+    60%  { background: #fffbf5; box-shadow: 0 0 0 2px rgba(253, 186, 116, 0.25); }
+    100% { background: #ffffff; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06); }
+}
+
+.demand-row.is-arriving .demand-accent { animation: occAccentFlash 900ms ease-out both; }
+
+@keyframes occAccentFlash {
+    0%   { transform: scaleY(0.2); opacity: 0.4; }
+    40%  { transform: scaleY(1);   opacity: 1; }
+    100% { transform: scaleY(1);   opacity: 1; }
+}
+
+.occ-col-count.is-ticking { animation: occCountPop 420ms cubic-bezier(.2, 1.5, .4, 1) both; }
+
+@keyframes occCountPop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.28); }
+    100% { transform: scale(1); }
+}
+
+.exec-card.is-running { animation: occLivePulse 2200ms ease-in-out infinite; }
+
+@keyframes occLivePulse {
+    0%, 100% { box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06), inset 4px 0 0 var(--color-blue); }
+    50%      { box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28), inset 4px 0 0 #60a5fa; }
+}
+
+.exec-card.is-entering { animation: occRowIn 320ms cubic-bezier(.2, .8, .2, 1) both; }
+
+/* A block that has just STARTED carries both classes, and `animation` is not
+   additive across rules - the later one would win and silently drop the live
+   pulse. Declare the pair explicitly so it enters and then keeps pulsing. */
+.exec-card.is-running.is-entering {
+    animation: occRowIn 320ms cubic-bezier(.2, .8, .2, 1) both,
+               occLivePulse 2200ms ease-in-out infinite;
+}
+
+.exec-card.is-withdrawn { animation: occShake 380ms ease-in-out both; }
+
+@keyframes occShake {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-4px); }
+    75%      { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .demand-row.is-arriving,
+    .demand-row.is-arriving .demand-accent,
+    .occ-col-count.is-ticking,
+    .exec-card.is-running,
+    .exec-card.is-entering,
+    .exec-card.is-withdrawn { animation: none !important; }
+    .exec-card, .exec-progress-fill { transition: none !important; }
+}
+
+/* -- Tabs, sized to the split's reserved height --------------------------- */
+
+.nav-tabs { height: var(--occ-tabs-h); }
+
+@media (max-width: 1180px) {
+    .occ-split { height: auto; grid-template-columns: minmax(0, 1fr); }
+    .occ-col { max-height: 60vh; }
+    .occ-col:first-child { border-right: none; border-bottom: 2px solid var(--occ-edge); }
 }

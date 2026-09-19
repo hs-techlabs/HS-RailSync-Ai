@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Management System (TMS) | Indian Railways Civil Engineering Portal</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/corridor_map.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=portal_v3">
+    <link rel="stylesheet" href="/static/css/corridor_map.css?v=portal_v3">
+    <link rel="stylesheet" href="/static/css/occ_redesign.css?v=portal_v3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
-<body class="portal-page-body">
+<body class="portal-page-body" data-theme="light">
     <div class="portal-container">
         <!-- Portal Header -->
         <header class="portal-header portal-header-tms">
@@ -29,7 +30,7 @@
             </div>
             <div class="portal-header-actions">
                 <span class="sim-clock-badge" id="tms-sim-clock" title="Accelerated corridor clock">&#9201; --:--:--</span>
-                <span class="corridor-badge" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af;">
+                <span class="corridor-badge">
                     <span class="pulse-dot" style="background:#1e40af;"></span>
                     <span>NDLS &ndash; CNB CORRIDOR</span>
                 </span>
@@ -158,10 +159,10 @@
         </div>
     </div>
 
-    <script src="/static/js/sim_clock.js"></script>
-    <script src="/static/js/portal_review.js"></script>
-    <script src="/static/js/corridor_map.js"></script>
-    <script src="/static/js/block_request.js"></script>
-    <script src="/static/js/tms_portal.js"></script>
+    <script src="/static/js/sim_clock.js?v=portal_v3"></script>
+    <script src="/static/js/portal_review.js?v=portal_v3"></script>
+    <script src="/static/js/corridor_map.js?v=portal_v3"></script>
+    <script src="/static/js/block_request.js?v=portal_v3"></script>
+    <script src="/static/js/tms_portal.js?v=portal_v3"></script>
 </body>
 </html>

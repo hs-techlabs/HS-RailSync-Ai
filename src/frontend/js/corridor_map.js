@@ -10,9 +10,22 @@
  *         onInspect: openBlockRequestForm
  *     });
  *
+ * The layer set is what separates the screens, and it follows authority: a
+ * portal sees its own ground-level reports and readings, while the OCC desk
+ * sees only ["demands", "blocks"] - the requisitions raised to it and the
+ * blocks it has sanctioned.
+ *
  * Everything else - geometry, polling, marker lifecycle, popups - is handled
  * here. The module is namespaced and holds all state per instance, so more than
  * one map can live on a page.
+ *
+ * CHROME
+ * Two chromes share one map. `chrome: "inline"` (the default) stacks a
+ * toolbar, station chips and legend around the canvas, which suits a map that
+ * sits inside a portal's card stack. `chrome: "overlay"` floats a single
+ * morphing command bar over a full-bleed canvas and docks feature cards in an
+ * inspector at the right edge - the OCC desk uses it because there the map is
+ * the screen. Every other option is independent of which chrome is chosen.
  *
  * THE UP/DN OFFSET
  * The API returns the corridor CENTRELINE plus a bearing at each vertex, never
@@ -60,14 +73,50 @@ const CorridorMap = (function () {
         LOW: "#059669"
     };
 
+    // `dash` marks a span as proposed rather than committed: a requisition the
+    // OCC has not sanctioned yet, or an isolation that rides on one. Marker fill
+    // always comes from severity, so the glyph is what identifies the layer.
     const LAYER_META = {
         issues:    { label: "Reported Issues",  glyph: "!",  color: "#dc2626", kind: "point" },
+        demands:   { label: "Raised Requests",  glyph: "D",  color: "#ea580c", kind: "span",
+                     dash: "9,7" },
         blocks:    { label: "Current Blocks",   glyph: "B",  color: "#7c3aed", kind: "span"  },
-        powercuts: { label: "Power Cuts",       glyph: "P",  color: "#d97706", kind: "span"  },
+        powercuts: { label: "Power Cuts",       glyph: "P",  color: "#d97706", kind: "span",
+                     dash: "9,7" },
         routines:  { label: "Routine Checks",   glyph: "R",  color: "#0891b2", kind: "point" },
         assets:    { label: "Asset Wear",       glyph: "W",  color: "#b45309", kind: "point" },
         health:    { label: "Track Health",     glyph: "H",  color: "#059669", kind: "span"  },
         trains:    { label: "Live Trains",      glyph: "T",  color: "#7c3aed", kind: "train" }
+    };
+
+    // Which layers offer an action in their popup, and what that action is
+    // called. The page supplies the handler through `onInspect`; the label
+    // follows the layer, so one hook serves both the portals (turn a field
+    // report into a requisition) and the OCC desk (find the requisition in the
+    // INCOMING queue). A layer absent here gets no action bar.
+    const ACTION_LABEL = {
+        issues:  "Inspect &amp; Raise Block",
+        demands: "Show in queue"
+    };
+
+    // The four control groups the overlay chrome can offer. `width` is the
+    // panel's declared width: the morphing viewport animates to it, so it has to
+    // be a number we own rather than something measured after the fact.
+    const CONTROL_META = {
+        basemap:  { label: "Basemap",  width: 330 },
+        layers:   { label: "Layers",   width: 520 },
+        stations: { label: "Stations", width: 460 },
+        live:     { label: "Live",     width: 320 }
+    };
+
+    const ALL_CONTROLS = ["basemap", "layers", "stations", "live"];
+
+    // LAYER_META colours are chosen to sit on the light inline toolbar. The
+    // overlay panel is a dark glass surface, where those same hues fail
+    // contrast, so each layer carries a lifted variant for that ground.
+    const LAYER_DARK = {
+        issues: "#f87171", demands: "#fb923c", blocks: "#a78bfa", powercuts: "#fbbf24",
+        routines: "#22d3ee", assets: "#fbbf24", health: "#34d399", trains: "#c4b5fd"
     };
 
     const EARTH_C = 156543.03392;   // metres per pixel at zoom 0 on the equator
@@ -242,6 +291,19 @@ const CorridorMap = (function () {
             extra = (d.description ? `<div class="cmap-card-desc">${esc(d.description)}</div>` : "")
                   + attachmentsHtml(d.attachments);
 
+        } else if (f.layer === "demands") {
+            rows = joinRows([
+                row("Section", `${d.section} (${f.line})`),
+                row("Chainage", `KM ${Number(f.km_start).toFixed(1)} - ${Number(f.km_end).toFixed(1)}`),
+                row("Requested", d.duration_requested_min ? `${d.duration_requested_min} min` : null),
+                row("Priority", d.priority),
+                row("Machine", d.machine_required !== "NONE" ? d.machine_required : null),
+                row("Gang", d.gang_crew),
+                row("Raised by", (d.department_label || "").replace(/\s*\(.*\)/, "")),
+                row("Awaiting", "OCC sanction")
+            ], limit);
+            extra = d.description ? `<div class="cmap-card-desc">${esc(d.description)}</div>` : "";
+
         } else if (f.layer === "blocks" || f.layer === "powercuts") {
             rows = joinRows([
                 row("Section", `${d.section} (${f.line})`),
@@ -341,13 +403,14 @@ const CorridorMap = (function () {
                 </div>`;
         }
 
-        // Only a live field report can be turned into a block request.
-        const canInspect = f.layer === "issues" && typeof opts.onInspect === "function";
-        const actions = canInspect
+        // Only the layers listed in ACTION_LABEL carry an action, and only when
+        // the host page has given the map somewhere to send it.
+        const actionLabel = ACTION_LABEL[f.layer];
+        const actions = (actionLabel && typeof opts.onInspect === "function")
             ? `<div class="cmap-card-actions">
                    <button class="cmap-action is-primary"
                            onclick="CorridorMap._inspect('${esc(opts.instanceId)}','${esc(f.id)}')">
-                       Inspect &amp; Raise Block
+                       ${actionLabel}
                    </button>
                </div>`
             : "";
@@ -387,10 +450,45 @@ const CorridorMap = (function () {
             trainPollMs: 2000,
             tall: false,
             showTrains: false,
-            onInspect: null
+            onInspect: null,
+
+            // --- chrome ---------------------------------------------------
+            // "inline" is the original stacked toolbar and stays the default, so
+            // a page that does not ask for the new chrome is unaffected.
+            // "overlay" floats one morphing control over a full-bleed canvas.
+            chrome: "inline",
+            height: null,          // "fill" | "tall" | number(px); null -> `tall`
+            controls: null,        // null -> all four groups
+            stations: null,        // null -> every station in the geometry
+            accent: null,          // overrides --cmap-accent on this instance
+            inspector: null,       // "panel" | "popup"; null -> chrome's default
+            onSelect: null,
+            onLayerToggle: null
         }, options || {});
 
         this.opts.instanceId = this.id;
+
+        // Normalise the chrome-dependent options once, here, so every later
+        // branch reads a settled value instead of re-deriving the default.
+        this.isOverlay = this.opts.chrome === "overlay";
+
+        if (!this.opts.inspector) {
+            this.opts.inspector = this.isOverlay ? "panel" : "popup";
+        }
+        if (!this.opts.controls) {
+            this.opts.controls = ALL_CONTROLS.slice();
+        }
+        this.opts.controls = this.opts.controls.filter(n => CONTROL_META[n]);
+
+        let h = this.opts.height;
+        if (h === null || h === undefined) h = this.opts.tall ? "tall" : 440;
+        if (h === "tall") h = 530;
+        this.heightCss = h === "fill"
+            ? "var(--cmap-height, min(72vh, 780px))"
+            : (typeof h === "number" ? h + "px" : String(h));
+
+        this.openPanelName = null;
+        this.selectedId = null;
         this.map = null;
         this.tileLayer = null;
         this.geometry = null;
@@ -430,8 +528,14 @@ const CorridorMap = (function () {
         this.setStatus(null);
     };
 
-    /** Builds the toolbar, canvas, chip rail and legend around the map. */
+    /** Builds the chrome the page asked for around the canvas. */
     CorridorMapInstance.prototype.buildChrome = function () {
+        if (this.isOverlay) this.buildOverlayChrome();
+        else this.buildInlineChrome();
+    };
+
+    /** The original stacked toolbar, chip rail and legend. Unchanged. */
+    CorridorMapInstance.prototype.buildInlineChrome = function () {
         const wanted = this.opts.layers
             || (this.geometry ? null : null)
             || ["issues"];   // replaced after the first refresh reveals the preset
@@ -464,6 +568,391 @@ const CorridorMap = (function () {
         void wanted;
     };
 
+    // -------------------------------------------------------------------
+    // Overlay chrome: one floating command bar over a full-bleed canvas
+    //
+    // Modelled on a spring-animated navigation menu: a layout-animated pill
+    // slides behind the active trigger, one viewport morphs its width and
+    // height to whichever panel is open, and the panel content slides in from
+    // the side it was reached from. The four controls that used to be four
+    // stacked bars all live in that one viewport, so the canvas gets the
+    // height back.
+    // -------------------------------------------------------------------
+
+    CorridorMapInstance.prototype.buildOverlayChrome = function () {
+        const self = this;
+        const o = this.opts;
+
+        this.container.classList.add("cmap-shell", "is-overlay");
+        this.container.style.height = this.heightCss;
+        if (o.accent) this.container.style.setProperty("--cmap-accent", o.accent);
+
+        const chevron = `<svg class="cmap-chev" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2.8" stroke-linecap="round"
+                              stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+
+        const trigs = o.controls.map(name => `
+            <button class="cmap-trig" type="button" data-panel="${esc(name)}">
+                ${esc(CONTROL_META[name].label)}${chevron}
+            </button>`).join("");
+
+        this.container.innerHTML = `
+            <div class="cmap-canvas" data-role="canvas"></div>
+            <div class="cmap-overlay">
+                <div class="cmap-bar-wrap" data-role="barwrap">
+                    <div class="cmap-bar">
+                        <div class="cmap-trigs" data-role="trigs">
+                            <span class="cmap-pill" data-role="pill"></span>
+                            ${trigs}
+                            <span class="cmap-arrow" data-role="arrow"></span>
+                        </div>
+                        <span class="cmap-bar-sep"></span>
+                        <button class="cmap-bar-btn" type="button" data-role="fit" title="Fit the whole corridor">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/>
+                            </svg>
+                            Fit
+                        </button>
+                    </div>
+                    <div class="cmap-viewport" data-role="viewport" hidden>
+                        <div class="cmap-panel" data-role="panelbody"></div>
+                    </div>
+                </div>
+                <div class="cmap-legend cmap-legend-capsule" data-role="legend"></div>
+                <div class="cmap-zoom">
+                    <button type="button" data-role="zin" title="Zoom in">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    </button>
+                    <button type="button" data-role="zout" title="Zoom out">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>
+                    </button>
+                </div>
+                <aside class="cmap-inspector" data-role="inspector" hidden></aside>
+                <div class="cmap-status" data-role="status">Loading corridor&hellip;</div>
+            </div>`;
+
+        this.container.querySelectorAll("[data-panel]").forEach(btn => {
+            btn.addEventListener("click", () => self.togglePanel(btn.dataset.panel));
+        });
+        this.container.querySelector("[data-role=fit]")
+            .addEventListener("click", () => { self.closePanel(); self.fitCorridor(); });
+        this.container.querySelector("[data-role=zin]")
+            .addEventListener("click", () => self.map && self.map.zoomIn());
+        this.container.querySelector("[data-role=zout]")
+            .addEventListener("click", () => self.map && self.map.zoomOut());
+
+        // Escape closes whichever floating surface is open, panel first.
+        this.onKeydown = function (e) {
+            if (e.key !== "Escape") return;
+            if (self.openPanelName) self.closePanel();
+            else self.closeInspector();
+        };
+        document.addEventListener("keydown", this.onKeydown);
+    };
+
+    /** The layer names this instance shows, trains included when asked for. */
+    CorridorMapInstance.prototype.layerNames = function () {
+        const names = (this.opts.layers || []).slice();
+        if (this.opts.showTrains && !names.includes("trains")) names.push("trains");
+        return names;
+    };
+
+    CorridorMapInstance.prototype.togglePanel = function (name) {
+        if (this.openPanelName === name) this.closePanel();
+        else this.openPanel(name);
+    };
+
+    /**
+     * Opens a panel inside the single morphing viewport.
+     *
+     * The viewport animates width and height between the outgoing and incoming
+     * panel, so the incoming content is rendered first at its declared width,
+     * measured, and only then is the transition released. Content slides in
+     * from the side its trigger sits on relative to the previous one, which is
+     * what makes switching feel like moving along the bar rather than
+     * reopening a dropdown.
+     */
+    CorridorMapInstance.prototype.openPanel = function (name) {
+        const vp = this.container.querySelector("[data-role=viewport]");
+        const body = this.container.querySelector("[data-role=panelbody]");
+        const meta = CONTROL_META[name];
+        if (!vp || !body || !meta) return;
+
+        const order = this.opts.controls;
+        const prev = this.openPanelName;
+        const goingRight = order.indexOf(name) > order.indexOf(prev);
+
+        const wasOpen = !vp.hidden;
+        const prevW = wasOpen ? vp.offsetWidth : 0;
+        const prevH = wasOpen ? vp.offsetHeight : 0;
+
+        clearTimeout(this.closeTimer);
+        body.className = "cmap-panel " + (goingRight ? "is-from-right" : "is-from-left");
+        body.style.width = meta.width + "px";
+        body.innerHTML = this.panelHtml(name);
+        this.wirePanel(name);
+
+        vp.hidden = false;
+        vp.style.transition = "none";
+        vp.style.width = meta.width + "px";
+        vp.style.height = "auto";
+        const natH = vp.offsetHeight;
+
+        vp.style.width = (wasOpen ? prevW : meta.width) + "px";
+        vp.style.height = (wasOpen ? prevH : 0) + "px";
+        vp.style.opacity = wasOpen ? "1" : "0";
+        void vp.offsetHeight;               // commit the start state
+        vp.style.transition = "";
+        vp.style.width = meta.width + "px";
+        vp.style.height = natH + "px";
+        vp.style.opacity = "1";
+
+        this.openPanelName = name;
+        this.syncTriggers();
+    };
+
+    CorridorMapInstance.prototype.closePanel = function () {
+        const vp = this.container.querySelector("[data-role=viewport]");
+        if (!vp || vp.hidden) return;
+
+        vp.style.height = "0px";
+        vp.style.opacity = "0";
+        clearTimeout(this.closeTimer);
+        this.closeTimer = setTimeout(() => { vp.hidden = true; }, 280);
+
+        this.openPanelName = null;
+        this.syncTriggers();
+    };
+
+    /** Moves the pill and the arrow to the open trigger, or parks them. */
+    CorridorMapInstance.prototype.syncTriggers = function () {
+        const pill = this.container.querySelector("[data-role=pill]");
+        const arrow = this.container.querySelector("[data-role=arrow]");
+        if (!pill) return;
+
+        const btn = this.openPanelName
+            ? this.container.querySelector(`[data-panel="${this.openPanelName}"]`)
+            : null;
+
+        this.container.querySelectorAll("[data-panel]").forEach(b => {
+            b.classList.toggle("is-active", b === btn);
+        });
+
+        if (!btn) {
+            pill.style.opacity = "0";
+            if (arrow) arrow.style.opacity = "0";
+            return;
+        }
+        pill.style.opacity = "1";
+        pill.style.left = btn.offsetLeft + "px";
+        pill.style.width = btn.offsetWidth + "px";
+        if (arrow) {
+            arrow.style.opacity = "1";
+            arrow.style.left = (btn.offsetLeft + btn.offsetWidth / 2 - 4.5) + "px";
+        }
+    };
+
+    CorridorMapInstance.prototype.panelHtml = function (name) {
+        const self = this;
+
+        if (name === "basemap") {
+            const tiles = Object.keys(TILES).map(k => `
+                <button type="button" class="cmap-tile${self.opts.basemap === k ? " is-active" : ""}"
+                        data-basemap="${esc(k)}">
+                    <span class="cmap-tile-swatch is-${esc(k)}"></span>
+                    <span class="cmap-tile-name">${k === "satellite" ? "Satellite" : "Dark GIS"}</span>
+                </button>`).join("");
+            return `<div class="cmap-panel-label">Basemap</div>
+                    <div class="cmap-tiles">${tiles}</div>`;
+        }
+
+        if (name === "layers") {
+            const rows = this.layerNames().map(n => {
+                const meta = LAYER_META[n] || { label: n, glyph: "*" };
+                const on = self.activeLayers.has(n);
+                return `
+                    <button type="button" class="cmap-lrow${on ? " is-active" : ""}"
+                            data-layer="${esc(n)}" style="--lc:${LAYER_DARK[n] || "#94a3b8"}">
+                        <span class="cmap-lrow-g">${esc(meta.glyph)}</span>
+                        <span class="cmap-lrow-t">${esc(meta.label)}</span>
+                        <span class="cmap-lrow-n">${(self.featureData[n] || []).length}</span>
+                    </button>`;
+            }).join("");
+            return `<div class="cmap-panel-head">
+                        <span class="cmap-panel-label">Operational layers</span>
+                        <span class="cmap-panel-meta" data-role="plotted">${this.plottedCount()} plotted</span>
+                    </div>
+                    <div class="cmap-lgrid">${rows}</div>`;
+        }
+
+        if (name === "stations") {
+            const allowed = this.opts.stations;
+            const sts = ((this.geometry && this.geometry.stations) || [])
+                .filter(st => !allowed || allowed.includes(st.code));
+            const chips = sts.map(st => `
+                <button type="button" class="cmap-schip${self.focusedStation === st.code ? " is-active" : ""}"
+                        data-station="${esc(st.code)}" title="${esc(st.name)}">
+                    <span class="cmap-schip-c">${esc(st.code)}</span>
+                    <span class="cmap-schip-km">KM ${esc(st.km)}</span>
+                </button>`).join("");
+            return `<div class="cmap-panel-label">Jump to station</div>
+                    <div class="cmap-schips">${chips}</div>`;
+        }
+
+        if (name === "live") {
+            const on = this.activeLayers.has("trains");
+            const polls = [2000, 5000, 15000].map(ms => `
+                <button type="button" class="cmap-poll${self.opts.pollMs === ms ? " is-active" : ""}"
+                        data-poll="${ms}">${ms / 1000} s</button>`).join("");
+            return `<div class="cmap-panel-label">Live feed</div>
+                    <button type="button" class="cmap-toggle${on ? " is-on" : ""}" data-role="traintoggle">
+                        <span>Train tracking</span>
+                        <span class="cmap-switch"><span class="cmap-knob"></span></span>
+                    </button>
+                    <div class="cmap-panel-label">Refresh interval</div>
+                    <div class="cmap-polls">${polls}</div>`;
+        }
+        return "";
+    };
+
+    CorridorMapInstance.prototype.wirePanel = function (name) {
+        const self = this;
+        const body = this.container.querySelector("[data-role=panelbody]");
+        if (!body) return;
+
+        if (name === "basemap") {
+            body.querySelectorAll("[data-basemap]").forEach(btn => {
+                btn.addEventListener("click", () => self.setBasemap(btn.dataset.basemap));
+            });
+        } else if (name === "layers") {
+            body.querySelectorAll("[data-layer]").forEach(btn => {
+                btn.addEventListener("click", () => self.toggleLayer(btn.dataset.layer));
+            });
+        } else if (name === "stations") {
+            body.querySelectorAll("[data-station]").forEach(btn => {
+                btn.addEventListener("click", () => { self.jumpTo(btn.dataset.station); self.closePanel(); });
+            });
+        } else if (name === "live") {
+            const t = body.querySelector("[data-role=traintoggle]");
+            if (t) t.addEventListener("click", () => {
+                self.toggleLayer("trains");
+                t.classList.toggle("is-on", self.activeLayers.has("trains"));
+            });
+            body.querySelectorAll("[data-poll]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    self.setPollMs(Number(btn.dataset.poll));
+                    body.querySelectorAll("[data-poll]").forEach(b => b.classList.toggle("is-active", b === btn));
+                });
+            });
+        }
+    };
+
+    /** Features currently drawn across every active layer. */
+    CorridorMapInstance.prototype.plottedCount = function () {
+        return Array.from(this.activeLayers)
+            .reduce((n, l) => n + ((this.featureData[l] || []).length), 0);
+    };
+
+    /**
+     * Keeps an open layers panel truthful after a poll without rebuilding it:
+     * a rebuild would drop the hover the operator is holding mid-click.
+     */
+    CorridorMapInstance.prototype.refreshLayersPanel = function () {
+        if (this.openPanelName !== "layers") return;
+        const body = this.container.querySelector("[data-role=panelbody]");
+        if (!body) return;
+        body.querySelectorAll("[data-layer]").forEach(btn => {
+            const n = btn.dataset.layer;
+            btn.classList.toggle("is-active", this.activeLayers.has(n));
+            const count = btn.querySelector(".cmap-lrow-n");
+            if (count) count.textContent = (this.featureData[n] || []).length;
+        });
+        const plotted = body.querySelector("[data-role=plotted]");
+        if (plotted) plotted.textContent = `${this.plottedCount()} plotted`;
+    };
+
+    /** One place every layer toggle goes through, whichever chrome raised it. */
+    CorridorMapInstance.prototype.toggleLayer = function (name) {
+        if (this.activeLayers.has(name)) this.activeLayers.delete(name);
+        else this.activeLayers.add(name);
+        const on = this.activeLayers.has(name);
+
+        this.container.querySelectorAll(`[data-layer="${name}"]`)
+            .forEach(b => b.classList.toggle("is-active", on));
+
+        this.renderAllLayers();
+        this.renderLegend();
+        this.refreshLayersPanel();
+        if (name === "trains") {
+            if (on && !this.featureData.trains) this.refreshTrains();
+            else this.renderTrains(this.featureData.trains || []);
+        }
+        if (typeof this.opts.onLayerToggle === "function") this.opts.onLayerToggle(name, on, this);
+    };
+
+    /** Replaces the active layer set, reporting each change through onLayerToggle. */
+    CorridorMapInstance.prototype.setLayers = function (names) {
+        const wanted = new Set(names || []);
+        this.layerNames().forEach(n => {
+            if (wanted.has(n) !== this.activeLayers.has(n)) this.toggleLayer(n);
+        });
+    };
+
+    CorridorMapInstance.prototype.setPollMs = function (ms) {
+        this.opts.pollMs = Number(ms) || 0;
+        this.timers.forEach(clearInterval);
+        this.timers = [];
+        this.startPolling();
+    };
+
+    CorridorMapInstance.prototype.focusStation = function (code) {
+        this.jumpTo(code);
+    };
+
+    // -------------------------------------------------------------------
+    // Inspector: the full feature card docked at the right edge
+    //
+    // A Leaflet popup is anchored to its marker, so a tall card near the top
+    // of the canvas forces an auto-pan that moves the very thing the operator
+    // just clicked. Docking the card keeps the map still.
+    // -------------------------------------------------------------------
+
+    CorridorMapInstance.prototype.select = function (featureId) {
+        const f = this.featureIndex[featureId];
+        if (!f) return;
+        this.selectedId = featureId;
+
+        if (typeof this.opts.onSelect === "function") this.opts.onSelect(f, this);
+        if (this.opts.inspector !== "panel") return;
+
+        const host = this.container.querySelector("[data-role=inspector]");
+        if (!host) return;
+        const self = this;
+
+        host.innerHTML = `
+            <button type="button" class="cmap-insp-close" data-role="inspclose" aria-label="Close">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            ${cardHtml(f, this.opts)}`;
+        host.hidden = false;
+        host.classList.remove("is-in");
+        void host.offsetWidth;
+        host.classList.add("is-in");
+        host.querySelector("[data-role=inspclose]")
+            .addEventListener("click", () => self.closeInspector());
+    };
+
+    CorridorMapInstance.prototype.closeInspector = function () {
+        const host = this.container.querySelector("[data-role=inspector]");
+        if (!host || host.hidden) return;
+        host.hidden = true;
+        this.selectedId = null;
+    };
+
     CorridorMapInstance.prototype.setStatus = function (text) {
         const el = this.container.querySelector("[data-role=status]");
         if (!el) return;
@@ -481,6 +970,9 @@ const CorridorMap = (function () {
             zoom: 8,
             zoomSnap: 0.5,
             scrollWheelZoom: false,      // don't hijack page scroll
+            // Leaflet's zoom control sits top-left, exactly where the overlay
+            // bar floats; the overlay draws its own pair bottom-right instead.
+            zoomControl: !this.isOverlay,
             attributionControl: true
         });
 
@@ -497,12 +989,16 @@ const CorridorMap = (function () {
             self.renderTrains(self.featureData.trains || []);
         });
 
-        this.map.on("click", () => self.map.scrollWheelZoom.enable());
+        this.map.on("click", () => {
+            self.map.scrollWheelZoom.enable();
+            self.closePanel();
+        });
     };
 
     CorridorMapInstance.prototype.setBasemap = function (mode) {
         const cfg = TILES[mode];
         if (!cfg || !this.map) return;
+        this.opts.basemap = mode;   // a panel built later must show the real state
 
         if (this.tileLayer) this.map.removeLayer(this.tileLayer);
         this.tileLayer = L.tileLayer(cfg.url, {
@@ -639,6 +1135,7 @@ const CorridorMap = (function () {
     CorridorMapInstance.prototype.jumpTo = function (code) {
         const st = (this.geometry.stations || []).find(s => s.code === code);
         if (!st || !this.map) return;
+        this.focusedStation = code;
 
         this.container.querySelectorAll("[data-station]")
             .forEach(b => b.classList.toggle("is-active", b.dataset.station === code));
@@ -650,10 +1147,18 @@ const CorridorMap = (function () {
 
     CorridorMapInstance.prototype.fitCorridor = function () {
         if (!this.map || !this.geometry) return;
+        this.focusedStation = null;
         this.container.querySelectorAll("[data-station]")
             .forEach(b => b.classList.remove("is-active"));
         const pts = this.geometry.centreline.map(p => [p.lat, p.lng]);
-        this.map.fitBounds(L.latLngBounds(pts), { padding: [30, 30], maxZoom: 10 });
+
+        // The overlay bar floats over the top-left corner, which is exactly
+        // where NDLS lands after a plain fit; pad that corner so the corridor
+        // starts below the bar instead of under it.
+        const fit = this.isOverlay
+            ? { paddingTopLeft: [40, 76], paddingBottomRight: [40, 60], maxZoom: 10 }
+            : { padding: [30, 30], maxZoom: 10 };
+        this.map.fitBounds(L.latLngBounds(pts), fit);
 
         // Only a fit performed against a real, measured container counts. See
         // invalidate() for why.
@@ -690,6 +1195,7 @@ const CorridorMap = (function () {
             this.buildLayerToggles();
             this.renderAllLayers();
             this.renderLegend();
+            this.refreshLayersPanel();
         } catch (err) {
             console.error("[CorridorMap] layer refresh failed:", err);
         }
@@ -724,20 +1230,29 @@ const CorridorMap = (function () {
         }).join("");
 
         host.querySelectorAll("[data-layer]").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const name = btn.dataset.layer;
-                if (self.activeLayers.has(name)) self.activeLayers.delete(name);
-                else self.activeLayers.add(name);
-                btn.classList.toggle("is-active", self.activeLayers.has(name));
-                self.renderAllLayers();
-                self.renderLegend();
-                if (name === "trains") self.renderTrains(self.featureData.trains || []);
-            });
+            btn.addEventListener("click", () => self.toggleLayer(btn.dataset.layer));
         });
     };
 
     CorridorMapInstance.prototype.renderAllLayers = function () {
         (this.opts.layers || []).forEach(name => this.renderLayer(name));
+    };
+
+    /**
+     * What a click on a feature does depends on the inspector mode: a popup
+     * anchored to the feature, or the full card docked in the overlay's
+     * inspector. Hover stays a tooltip either way.
+     */
+    CorridorMapInstance.prototype.bindOpen = function (layer, f) {
+        const self = this;
+        if (this.opts.inspector === "panel") {
+            layer.on("click", () => { self.closePanel(); self.select(f.id); });
+            return;
+        }
+        layer.bindPopup(cardHtml(f, this.opts), {
+            className: "cmap-popup", maxWidth: 300, autoPan: true,
+            autoPanPadding: [24, 24]
+        });
     };
 
     CorridorMapInstance.prototype.renderLayer = function (name) {
@@ -759,25 +1274,23 @@ const CorridorMap = (function () {
             self.featureIndex[f.id] = f;
             const colour = severityColor(f.severity);
 
-            // Spans (blocks, power cuts, health) get a stroked stretch of rail;
-            // health is drawn wider and softer because it describes a condition
-            // over a length rather than a possession on it.
+            // Spans (requests, blocks, power cuts, health) get a stroked stretch
+            // of rail; health is drawn wider and softer because it describes a
+            // condition over a length rather than a possession on it. A dashed
+            // stroke means the possession is proposed, not yet sanctioned.
             if (meta.kind === "span" && f.path && f.path.length > 1) {
                 const line = railPath(f.path, f.line, metres);
                 const isHealth = name === "health";
-                L.polyline(line, {
+                const span = L.polyline(line, {
                     color: colour,
                     weight: isHealth ? 9 : 6,
                     opacity: isHealth ? 0.4 : 0.85,
-                    dashArray: name === "powercuts" ? "9,7" : null,
+                    dashArray: meta.dash || null,
                     lineCap: "round"
-                }).addTo(group)
-                  .bindTooltip(cardHtml(f, self.opts, true),
-                      { sticky: true, className: "cmap-tooltip" })
-                  .bindPopup(cardHtml(f, self.opts), {
-                      className: "cmap-popup", maxWidth: 300, autoPan: true,
-                      autoPanPadding: [24, 24]
-                  });
+                }).addTo(group);
+                span.bindTooltip(cardHtml(f, self.opts, true),
+                    { sticky: true, className: "cmap-tooltip" });
+                self.bindOpen(span, f);
             }
 
             const anchor = railPoint(f, f.line, metres);
@@ -796,9 +1309,7 @@ const CorridorMap = (function () {
 
             marker.bindTooltip(cardHtml(f, self.opts, true),
                 { direction: "top", className: "cmap-tooltip", offset: [0, -12] });
-            marker.bindPopup(cardHtml(f, self.opts),
-                { className: "cmap-popup", maxWidth: 300, autoPan: true,
-                  autoPanPadding: [24, 24] });
+            self.bindOpen(marker, f);
             flipTooltipToFit(self.map, marker, 12);
         });
 
@@ -921,6 +1432,8 @@ const CorridorMap = (function () {
     CorridorMapInstance.prototype.destroy = function () {
         this.timers.forEach(clearInterval);
         this.timers = [];
+        clearTimeout(this.closeTimer);
+        if (this.onKeydown) document.removeEventListener("keydown", this.onKeydown);
         if (this.map) this.map.remove();
         this.map = null;
     };
@@ -975,6 +1488,9 @@ const CorridorMap = (function () {
         /** All mounted instances, used by pages that need to invalidate on tab switch. */
         instances: instances,
 
+        /** Registered control groups, so a page can validate its `controls` list. */
+        controls: ALL_CONTROLS.slice(),
+
         invalidateAll: function () {
             instances.forEach(i => i.invalidate());
         },
@@ -986,6 +1502,7 @@ const CorridorMap = (function () {
             const feature = inst.featureIndex[featureId];
             if (feature && typeof inst.opts.onInspect === "function") {
                 if (inst.map) inst.map.closePopup();
+                inst.closeInspector();
                 inst.opts.onInspect(feature, inst);
             }
         }

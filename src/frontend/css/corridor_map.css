@@ -180,11 +180,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 30px;
-    height: 17px;
-    padding: 0 5px;
+    min-width: 26px;
+    height: 16px;
+    padding: 0 4px;
     font-family: var(--font-mono, monospace);
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 700;
     letter-spacing: .3px;
     color: #fff;
@@ -193,6 +193,19 @@
     border-radius: 3px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .5);
     white-space: nowrap;
+    transition: transform .15s ease;
+}
+
+/* Stagger adjacent station labels vertically to eliminate overlapping collision blobs */
+.cmap-station:nth-child(odd) .cmap-station-core {
+    transform: translateY(-9px);
+}
+.cmap-station:nth-child(even) .cmap-station-core {
+    transform: translateY(9px);
+}
+.cmap-station:hover .cmap-station-core {
+    z-index: 999;
+    transform: scale(1.15);
 }
 
 .cmap-station-tick {
@@ -517,3 +530,561 @@
 }
 
 .cmap-status[hidden] { display: none !important; }
+
+
+/* ==========================================================================
+   OVERLAY CHROME  (chrome: "overlay")
+   One floating command bar over a full-bleed canvas. A layout-animated pill
+   slides behind the active trigger, a single viewport morphs to whichever
+   panel is open, and panel content slides in from the side it was reached
+   from. Nothing here touches the inline chrome above.
+   ========================================================================== */
+
+.cmap-shell.is-overlay {
+    --cmap-accent:  #2563eb;
+    --cmap-surface: rgba(15, 23, 42, .84);
+    --cmap-line:    rgba(148, 163, 184, .28);
+    --cmap-radius:  9px;
+    --cmap-blur:    14px;
+    /* Spring 350/32, bounce 0: critically damped, settles in ~420ms. */
+    --cmap-spring:  420ms cubic-bezier(.22, 1, .36, 1);
+    /* The indicator arrow rides a stiffer spring (400/20). */
+    --cmap-snap:    300ms cubic-bezier(.16, 1.2, .3, 1);
+
+    background: #0b1220;
+    border: none;
+    border-radius: 0;
+}
+
+.cmap-shell.is-overlay,
+.cmap-shell.is-overlay * { box-sizing: border-box; }
+
+.cmap-shell.is-overlay .cmap-canvas {
+    height: 100%;
+    background: #0b1220;
+}
+
+/* The overlay never eats a map gesture; only its own controls do. */
+.cmap-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 450;
+    pointer-events: none;
+    font-family: var(--font-main, 'Inter', sans-serif);
+}
+
+.cmap-overlay > * { pointer-events: auto; }
+.cmap-overlay .cmap-status { pointer-events: none; }
+
+
+/* --- command bar ---------------------------------------------------------- */
+
+.cmap-bar-wrap {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+}
+
+.cmap-bar {
+    display: flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 5px;
+    background: var(--cmap-surface);
+    backdrop-filter: blur(var(--cmap-blur));
+    -webkit-backdrop-filter: blur(var(--cmap-blur));
+    border: 1px solid var(--cmap-line);
+    border-radius: var(--cmap-radius);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, .45);
+}
+
+.cmap-bar-sep {
+    width: 1px;
+    height: 20px;
+    margin: 0 7px;
+    background: rgba(148, 163, 184, .3);
+}
+
+.cmap-bar-btn,
+.cmap-trig {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 0 11px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: .01em;
+    color: #cbd5e1;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .15s ease;
+}
+
+.cmap-bar-btn:hover,
+.cmap-trig:hover,
+.cmap-trig.is-active { color: #ffffff; }
+
+.cmap-trigs {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.cmap-trig { position: relative; z-index: 1; }
+
+.cmap-chev {
+    flex: none;
+    transition: transform var(--cmap-snap);
+}
+
+.cmap-trig.is-active .cmap-chev { transform: rotate(180deg); }
+
+/* The layout-animated pill: one element that slides between triggers. */
+.cmap-pill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--cmap-accent);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--cmap-accent) 40%, transparent);
+    opacity: 0;
+    transition: left var(--cmap-spring), width var(--cmap-spring), opacity .2s ease;
+}
+
+/* The arrow that ties the viewport to its trigger. */
+.cmap-arrow {
+    position: absolute;
+    top: 38px;
+    left: 0;
+    width: 9px;
+    height: 9px;
+    transform: rotate(45deg);
+    background: rgba(15, 23, 42, .94);
+    border-left: 1px solid var(--cmap-line);
+    border-top: 1px solid var(--cmap-line);
+    opacity: 0;
+    z-index: 3;
+    transition: left var(--cmap-snap), opacity .16s ease;
+}
+
+
+/* --- morphing viewport ---------------------------------------------------- */
+
+.cmap-viewport {
+    margin-top: 9px;
+    overflow: hidden;
+    background: rgba(15, 23, 42, .93);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--cmap-line);
+    border-radius: 10px;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, .5);
+    transition: width var(--cmap-spring), height var(--cmap-spring), opacity .2s ease;
+}
+
+.cmap-viewport[hidden] { display: none !important; }
+
+.cmap-panel {
+    padding: 12px 13px;
+    color: #e2e8f0;
+}
+
+.cmap-panel.is-from-right { animation: cmap-from-right 300ms cubic-bezier(.22, 1, .36, 1) both; }
+.cmap-panel.is-from-left  { animation: cmap-from-left  300ms cubic-bezier(.22, 1, .36, 1) both; }
+
+@keyframes cmap-from-right {
+    from { opacity: 0; transform: translateX(28px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes cmap-from-left {
+    from { opacity: 0; transform: translateX(-28px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.cmap-panel-head {
+    display: flex;
+    align-items: center;
+    margin-bottom: 9px;
+}
+
+.cmap-panel-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.cmap-panel-label + .cmap-tiles,
+.cmap-panel-label + .cmap-schips,
+.cmap-panel-label + .cmap-toggle,
+.cmap-panel-label + .cmap-polls { margin-top: 9px; }
+
+.cmap-toggle + .cmap-panel-label { margin-top: 12px; }
+
+.cmap-panel-meta {
+    margin-left: auto;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+/* Basemap tiles */
+.cmap-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.cmap-tile {
+    padding: 0;
+    overflow: hidden;
+    background: #0b1220;
+    border: 1.5px solid rgba(148, 163, 184, .22);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: border-color .15s ease;
+}
+
+.cmap-tile.is-active { border-color: var(--cmap-accent); }
+
+.cmap-tile-swatch { display: block; height: 54px; }
+.cmap-tile-swatch.is-satellite { background: linear-gradient(135deg, #2f3d2a 0%, #4a5236 38%, #6b6a44 62%, #3b4a3a 100%); }
+.cmap-tile-swatch.is-dark      { background: linear-gradient(135deg, #0b1220 0%, #16233a 55%, #1e2f4a 100%); }
+
+.cmap-tile-name {
+    display: block;
+    padding: 6px 9px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #94a3b8;
+    background: rgba(148, 163, 184, .1);
+}
+
+.cmap-tile.is-active .cmap-tile-name { color: #ffffff; }
+
+/* Layer rows */
+.cmap-lgrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+}
+
+.cmap-lrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 9px;
+    font-family: inherit;
+    color: #64748b;
+    background: transparent;
+    border: 1px solid rgba(148, 163, 184, .14);
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: background .14s ease, border-color .14s ease, color .14s ease;
+}
+
+.cmap-lrow:hover { background: rgba(148, 163, 184, .14); }
+
+.cmap-lrow.is-active {
+    color: #f1f5f9;
+    background: rgba(148, 163, 184, .16);
+    border-color: rgba(148, 163, 184, .34);
+}
+
+.cmap-lrow-g {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.56rem;
+    font-weight: 700;
+    color: var(--lc);
+    background: rgba(148, 163, 184, .14);
+    border-radius: 4px;
+}
+
+.cmap-lrow.is-active .cmap-lrow-g { background: color-mix(in srgb, var(--lc) 20%, transparent); }
+
+.cmap-lrow-t {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cmap-lrow-n {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.cmap-lrow.is-active .cmap-lrow-n { color: var(--lc); }
+
+/* Station chips */
+.cmap-schips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.cmap-schip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 30px;
+    padding: 0 11px;
+    font-family: var(--font-mono, monospace);
+    color: #e2e8f0;
+    background: rgba(148, 163, 184, .12);
+    border: 1px solid rgba(148, 163, 184, .24);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .14s ease, border-color .14s ease;
+}
+
+.cmap-schip:hover { background: rgba(148, 163, 184, .2); }
+
+.cmap-schip.is-active {
+    color: #ffffff;
+    background: var(--cmap-accent);
+    border-color: var(--cmap-accent);
+}
+
+.cmap-schip-c  { font-size: 0.68rem; font-weight: 700; }
+.cmap-schip-km { font-size: 0.6rem; font-weight: 600; color: #64748b; }
+.cmap-schip.is-active .cmap-schip-km { color: rgba(255, 255, 255, .75); }
+
+/* Live panel */
+.cmap-toggle {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    height: 34px;
+    padding: 0 10px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    background: transparent;
+    border: 1px solid rgba(148, 163, 184, .16);
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.cmap-toggle.is-on {
+    background: rgba(148, 163, 184, .16);
+    border-color: rgba(148, 163, 184, .34);
+}
+
+.cmap-switch {
+    position: relative;
+    display: block;
+    flex: none;
+    width: 32px;
+    height: 18px;
+    margin-left: auto;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, .35);
+    transition: background var(--cmap-spring);
+}
+
+.cmap-toggle.is-on .cmap-switch { background: var(--cmap-accent); }
+
+.cmap-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: left var(--cmap-spring);
+}
+
+.cmap-toggle.is-on .cmap-knob { left: 16px; }
+
+.cmap-polls {
+    display: flex;
+    gap: 5px;
+}
+
+.cmap-poll {
+    flex: 1;
+    height: 28px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    background: rgba(148, 163, 184, .12);
+    border: 1px solid rgba(148, 163, 184, .24);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.cmap-poll.is-active {
+    color: #ffffff;
+    background: var(--cmap-accent);
+    border-color: var(--cmap-accent);
+}
+
+
+/* --- legend capsule, zoom ------------------------------------------------- */
+
+.cmap-legend-capsule {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    flex-wrap: nowrap;
+    height: 32px;
+    padding: 0 13px;
+    color: #cbd5e1;
+    background: var(--cmap-surface);
+    backdrop-filter: blur(var(--cmap-blur));
+    -webkit-backdrop-filter: blur(var(--cmap-blur));
+    border: 1px solid rgba(148, 163, 184, .26);
+    border-top: 1px solid rgba(148, 163, 184, .26);
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.cmap-legend-capsule .cmap-legend-count {
+    margin-left: 2px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(148, 163, 184, .28);
+    color: #94a3b8;
+}
+
+.cmap-zoom {
+    position: absolute;
+    right: 14px;
+    bottom: 30px;              /* clears Leaflet's attribution strip */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--cmap-surface);
+    backdrop-filter: blur(var(--cmap-blur));
+    -webkit-backdrop-filter: blur(var(--cmap-blur));
+    border: 1px solid rgba(148, 163, 184, .26);
+    border-radius: 8px;
+}
+
+.cmap-zoom button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 30px;
+    color: #e2e8f0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.cmap-zoom button + button { border-top: 1px solid rgba(148, 163, 184, .22); }
+.cmap-zoom button:hover { background: rgba(148, 163, 184, .14); }
+
+.cmap-shell.is-overlay .leaflet-control-attribution {
+    background: rgba(15, 23, 42, .7);
+    color: #94a3b8;
+    font-size: 0.58rem;
+}
+
+.cmap-shell.is-overlay .leaflet-control-attribution a { color: #cbd5e1; }
+
+
+/* --- inspector ------------------------------------------------------------ */
+
+.cmap-inspector {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    width: 306px;
+    max-height: calc(100% - 28px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.cmap-inspector[hidden] { display: none !important; }
+
+.cmap-inspector.is-in { animation: cmap-insp-in 380ms cubic-bezier(.22, 1, .36, 1) both; }
+
+@keyframes cmap-insp-in {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* The docked card is the popup card at the inspector's width. */
+.cmap-inspector .cmap-card {
+    width: 100%;
+    background: rgba(15, 23, 42, .93);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 10px;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, .5);
+}
+
+.cmap-inspector .cmap-card-head { padding-right: 40px; }
+
+.cmap-insp-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: #94a3b8;
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cmap-insp-close:hover { color: #ffffff; background: rgba(148, 163, 184, .16); }
+
+.cmap-inspector .cmap-card-actions { padding: 0 10px 10px; }
+
+.cmap-inspector .cmap-action.is-primary {
+    width: 100%;
+    height: 34px;
+    background: var(--cmap-accent);
+    border-color: var(--cmap-accent);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+
+/* --- reduced motion ------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .cmap-pill, .cmap-arrow, .cmap-viewport, .cmap-chev,
+    .cmap-switch, .cmap-knob { transition: none !important; }
+    .cmap-panel.is-from-right, .cmap-panel.is-from-left,
+    .cmap-inspector.is-in { animation: none !important; }
+}

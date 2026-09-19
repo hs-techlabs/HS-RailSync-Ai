@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI-Kit · Animated List</title>
+
+<!-- The module. Two files, no build step, no dependencies. -->
+<link rel="stylesheet" href="animated-list.css">
+<script src="animated-list.js"></script>
+<script src="list.presets.js"></script>
+
+<style>
+    /* The OCC design tokens. The module reads these; on a real portal page
+       they already come from css/style.css and nothing here is needed. */
+    :root {
+        --bg-base: #f8fafc;
+        --bg-surface: #ffffff;
+        --bg-surface-subtle: #f1f5f9;
+        --border-color: #e2e8f0;
+        --text-primary: #0f172a;
+        --text-muted: #64748b;
+        --text-subtle: #94a3b8;
+        --color-primary: #0f2b5c;
+        --color-blue: #2563eb;
+        --color-emerald: #059669;
+        --color-amber: #d97706;
+        --color-crimson: #dc2626;
+        --dept-track-text: #1e40af; --dept-track-bg: #eff6ff; --dept-track-border: #bfdbfe;
+        --dept-ohe-text: #b45309;   --dept-ohe-bg: #fffbeb;   --dept-ohe-border: #fde68a;
+        --dept-sig-text: #047857;   --dept-sig-bg: #ecfdf5;   --dept-sig-border: #a7f3d0;
+        --dept-bundle-text: #6366f1;
+        --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+        --radius-md: 8px; --radius-lg: 12px;
+        --shadow-card: 0 1px 4px rgba(15, 23, 42, 0.06);
+        --shadow-elevated: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background: var(--bg-base);
+        font-family: var(--font-main);
+        color: var(--text-primary);
+        padding: 28px 22px 60px;
+    }
+
+    .wrap { max-width: 1180px; margin: 0 auto; }
+
+    h1 { font-size: 19px; letter-spacing: -0.02em; }
+
+    .sub { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; }
+
+    .bar {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+        margin: 20px 0 22px; padding: 12px 14px;
+        background: var(--bg-surface); border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    }
+
+    button, select {
+        font-family: inherit; font-size: 12px; font-weight: 500;
+        padding: 6px 12px; border-radius: var(--radius-md);
+        border: 1px solid var(--border-color); background: var(--bg-surface);
+        color: var(--text-primary); cursor: pointer;
+    }
+
+    button:hover { background: var(--bg-surface-subtle); }
+
+    button.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+    button.primary:hover { filter: brightness(1.15); }
+
+    label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .spacer { flex: 1; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    .panel {
+        background: var(--bg-surface); border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg); box-shadow: var(--shadow-card); overflow: hidden;
+    }
+
+    .panel-head {
+        display: flex; align-items: center; gap: 8px;
+        padding: 10px 13px; border-bottom: 1px solid var(--border-color);
+        background: var(--bg-surface-subtle);
+    }
+
+    .panel-title { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; color: var(--text-muted); }
+
+    .panel-note { font-size: 10.5px; color: var(--text-subtle); margin-left: auto; }
+
+    .panel-body { padding: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <h1>UI-Kit · Animated List</h1>
+    <p class="sub">
+        Spring-physics push feed. Same behaviour as the React reference — items enter from the top,
+        removed rows leave the flow immediately, survivors glide to their new slot — with no framework,
+        no Tailwind and no build step.
+    </p>
+
+    <div class="bar">
+        <button class="primary" onclick="pushEvent()">Push event</button>
+        <button onclick="burst()">Burst ×5</button>
+        <button onclick="dropRandom()">Drop random</button>
+        <button onclick="reprioritise()">Re-sort by priority</button>
+        <button onclick="feed.clear(); queue.clear(); notices.clear()">Clear</button>
+
+        <span class="spacer"></span>
+
+        <label for="anim">Variant</label>
+        <select id="anim" onchange="setAnimation(this.value)">
+            <option value="scale">scale</option>
+            <option value="slide">slide</option>
+            <option value="fade">fade</option>
+            <option value="bounce">bounce</option>
+            <option value="none">none</option>
+        </select>
+
+        <label for="stream">Live stream</label>
+        <button id="stream" onclick="toggleStream()">Start</button>
+    </div>
+
+    <div class="grid">
+
+        <section class="panel">
+            <div class="panel-head">
+                <span class="panel-title">LIVE EVENT FEED</span>
+                <span class="panel-note">eventFeed · hover to hold</span>
+            </div>
+            <div class="panel-body"><div id="feed"></div></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <span class="panel-title">INCOMING DEMANDS</span>
+                <span class="panel-note">demandQueue</span>
+            </div>
+            <div class="panel-body"><div id="queue"></div></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <span class="panel-title">NOTICES</span>
+                <span class="panel-note">notices · al-bare</span>
+            </div>
+            <div class="panel-body"><div id="notices"></div></div>
+        </section>
+
+    </div>
+</div>
+
+<script>
+/* ==========================================================================
+   Demo wiring. Three lists, three presets, one shared module.
+   ========================================================================== */
+
+var feed = AnimatedList.create(LIST_PRESETS.eventFeed('#feed', {
+    onItemClick: function (ev) { console.log('event clicked', ev); }
+}));
+
+var queue = AnimatedList.create(LIST_PRESETS.demandQueue('#queue', {
+    maxVisible: 6,
+    onItemClick: function (dm) { console.log('demand clicked', dm); }
+}));
+
+var notices = AnimatedList.create(LIST_PRESETS.notices('#notices'));
+
+/* ---- Fixture data, shaped exactly like the API payloads ---------------- */
+var DEPTS = ['ENGINEERING_TRACK', 'TRACTION_DISTRIBUTION_OHE', 'SIGNAL_AND_TELECOM'];
+var KINDS = ['REPORT_SUBMITTED', 'DEMAND_RAISED', 'BLOCK_SANCTIONED', 'BLOCK_STARTED', 'BLOCK_COMPLETED', 'DISRUPTION'];
+var SEVS  = ['info', 'info', 'warning', 'success', 'critical'];
+var DEFECTS = ['Rail Flaw (USFD)', 'Track Geometry Attention (TGI)', 'OHE Tension & Insulator Inspection',
+               'Point Machine Overhaul', 'Track Circuit Fault', 'Contact Wire Wear'];
+var SECTIONS = [['NDLS', 'GZB'], ['GZB', 'DER'], ['KRJ', 'ALJN'], ['ETW', 'PHD'], ['ALJN', 'TDL']];
+var PRIORITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
+
+var seq = 0;
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function hex(n) { var s = ''; while (s.length < n) s += '0123456789ABCDEF'[Math.floor(Math.random() * 16)]; return s; }
+
+function makeEvent() {
+    var sec = pick(SECTIONS);
+    var km = (Math.random() * 440).toFixed(1);
+    var kind = pick(KINDS);
+    return {
+        event_id: 'EVT-' + hex(8),
+        seq: ++seq,
+        kind: kind,
+        department: pick(DEPTS),
+        severity: kind === 'DISRUPTION' ? 'critical' : pick(SEVS),
+        title: 'New field report WREQ-' + hex(6),
+        message: pick(DEFECTS) + ' at KM ' + km + ' (' + sec[0] + ' - ' + sec[1] + ', ' +
+                 (Math.random() > 0.5 ? 'UP' : 'DN') + '). Awaiting review.',
+        ref_id: 'WREQ-' + hex(8),
+        sim_time: new Date().toISOString()
+    };
+}
+
+function makeDemand() {
+    var sec = pick(SECTIONS);
+    var km = Math.random() * 430;
+    return {
+        demand_id: 'DMD-' + hex(6),
+        department: pick(DEPTS),
+        defect_category: pick(DEFECTS),
+        section_from: sec[0],
+        section_to: sec[1],
+        line: Math.random() > 0.5 ? 'UP' : 'DN',
+        km_start: km,
+        km_end: km + Math.random() * 3,
+        power_block_required: Math.random() > 0.7,
+        disconnection_required: Math.random() > 0.85,
+        duration_requested_min: 60 + Math.floor(Math.random() * 200),
+        priority: pick(PRIORITIES),
+        description: 'Requisition raised from the ' + sec[0] + ' depot for the ' + sec[0] + '–' + sec[1] + ' section.',
+        status: 'PENDING_REVIEW',
+        raised_at: new Date().toISOString()
+    };
+}
+
+function makeNotice() {
+    return {
+        id: 'N-' + hex(6),
+        severity: pick(SEVS),
+        title: pick(['Optimiser run complete', 'Punctuality dipped', 'Shadow block sanctioned', 'Tamping unit released']),
+        message: 'CP-SAT re-bundled ' + (2 + Math.floor(Math.random() * 6)) + ' requisitions.',
+        tag: 'CP-SAT',
+        timestamp: new Date().toISOString()
+    };
+}
+
+/* ---- Controls ---------------------------------------------------------- */
+
+function pushEvent() {
+    feed.prepend(makeEvent());
+    if (Math.random() > 0.55) queue.prepend(makeDemand());
+    if (Math.random() > 0.75) notices.prepend(makeNotice());
+}
+
+function burst() {
+    /* Five in quick succession — the interesting stress case, since rows are
+       still mid-entrance when the next one lands on top of them. */
+    for (var i = 0; i < 5; i++) setTimeout(pushEvent, i * 90);
+}
+
+function dropRandom() {
+    var items = feed.getItems();
+    if (!items.length) return;
+    feed.remove(pick(items).event_id);
+}
+
+function reprioritise() {
+    /* A pure re-sort: no enters, no exits, every visible row FLIPs to its
+       new slot. This is the case a naive innerHTML rebuild cannot do. */
+    var rank = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+    queue.setItems(queue.getItems().slice().sort(function (a, b) {
+        return rank[a.priority] - rank[b.priority];
+    }));
+}
+
+function setAnimation(value) {
+    [feed, queue, notices].forEach(function (l) { l.setOption('animation', value); });
+}
+
+var timer = null;
+
+function toggleStream() {
+    var btn = document.getElementById('stream');
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+        btn.textContent = 'Start';
+        btn.classList.remove('primary');
+    } else {
+        timer = setInterval(pushEvent, 1400);
+        btn.textContent = 'Stop';
+        btn.classList.add('primary');
+    }
+}
+
+/* ---- Seed -------------------------------------------------------------- */
+feed.setItems([makeEvent(), makeEvent(), makeEvent()]);
+queue.setItems([makeDemand(), makeDemand()]);
+notices.setItems([makeNotice()]);
+</script>
+</body>
+</html>

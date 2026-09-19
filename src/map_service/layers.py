@@ -226,6 +226,51 @@ def blocks_layer(department: str = "ALL", include_completed: bool = False) -> li
     return _sort_features(features)
 
 
+# ---------------------------------------------------------------------------
+# demands - requisitions raised by a department, awaiting OCC sanction
+# ---------------------------------------------------------------------------
+
+def demands_layer(department: str = "ALL") -> list:
+    """
+    Block requisitions the departments have formally raised and forwarded to the
+    OCC, still waiting on a sanction decision.
+
+    This is the middle of the lifecycle, and the only stage the OCC master desk
+    can actually act on. A field report at PENDING_REVIEW is still the
+    department's business and belongs on the portal maps; once sanctioned the
+    record graduates to `blocks_layer`. The two layers filter on disjoint status
+    sets, so nothing is ever plotted twice.
+
+    Reads the same records `/api/demand/pending` serves the INCOMING queue, so
+    the map and the queue can never disagree about what is waiting.
+    """
+    demands = [
+        d for d in sim_state.read_demands()
+        if d.get("status") == "PENDING_SANCTION"
+    ]
+
+    features = []
+    for d in _dept_filter(demands, department):
+        anchor = _anchor(d.get("km_start"), d.get("km_end"), d.get("line"))
+        section = f"{d.get('section_from')} - {d.get('section_to')}"
+
+        features.append({
+            "id": d.get("demand_id"),
+            "layer": "demands",
+            "severity": str(d.get("priority", "MEDIUM")).upper(),
+            "title": f"Requisition: {d.get('demand_id')}",
+            "subtitle": f"{section} ({anchor['line']}) - "
+                        f"{d.get('duration_requested_min')} min requested",
+            "department": d.get("department"),
+            "department_label": d.get("department_label"),
+            "status": d.get("status"),
+            **anchor,
+            "detail": {**d, "section": section},
+        })
+
+    return _sort_features(features)
+
+
 def powercuts_layer(department: str = "ALL") -> list:
     """
     TDMS 2.3 - approved blocks that carry a 25 kV traction isolation.
@@ -523,6 +568,7 @@ def health_layer(department: str = "SIGNAL_AND_TELECOM") -> list:
 
 LAYER_BUILDERS = {
     "issues": lambda dept: issues_layer(dept),
+    "demands": lambda dept: demands_layer(dept),
     "blocks": lambda dept: blocks_layer(dept),
     "powercuts": lambda dept: powercuts_layer(dept),
     "routines": lambda dept: routines_layer(dept),
@@ -531,11 +577,16 @@ LAYER_BUILDERS = {
 }
 
 # What each screen asks for by default, straight from the requirements.
+#
+# ALL is the OCC master desk, and it is deliberately the narrowest of the four:
+# the OCC deals in sanctioned work and the requisitions queued for sanction,
+# never in the ground-level reports and condition readings the departments
+# triage on their own portals.
 PORTAL_LAYER_PRESETS = {
     "ENGINEERING_TRACK": ["issues", "blocks", "routines"],
     "TRACTION_DISTRIBUTION_OHE": ["issues", "assets", "powercuts"],
     "SIGNAL_AND_TELECOM": ["issues", "health"],
-    "ALL": ["issues", "blocks", "routines", "assets", "health"],
+    "ALL": ["demands", "blocks"],
 }
 
 

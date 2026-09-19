@@ -1,0 +1,711 @@
+/* ==========================================================================
+   @railways/corridor-strip
+
+   Self-contained: every value resolves through a --cs-* token that falls back
+   to the host app's token, then to a built-in default. Drop this on a page
+   that already defines --bg-surface / --text-primary / etc. and the strip
+   adopts that palette; drop it on a bare page and it still looks right.
+   ========================================================================== */
+
+.cs-host,
+.hc-card {
+  --cs-surface: var(--bg-surface, #ffffff);
+  --cs-subtle: var(--bg-subtle, #f1f5f9);
+  --cs-border: var(--border-color, #e2e8f0);
+  --cs-border-subtle: var(--border-subtle, #edf2f7);
+  --cs-border-medium: var(--border-medium, #cbd5e1);
+
+  --cs-text: var(--text-primary, #0f172a);
+  --cs-text-2: var(--text-secondary, #334155);
+  --cs-text-muted: var(--text-muted, #64748b);
+  --cs-text-subtle: var(--text-subtle, #94a3b8);
+
+  --cs-primary: var(--color-primary, #0f2b5c);
+  --cs-rail: var(--rail, #94a3b8);
+  --cs-rail-strong: var(--rail-strong, #64748b);
+  --cs-tie: var(--tie, #94a3b8);
+  --cs-band: var(--band, #f1f5f9);
+
+  --cs-sev-critical: var(--sev-critical, #dc2626);
+  --cs-sev-high: var(--sev-high, #d97706);
+  --cs-sev-medium: var(--sev-medium, #2563eb);
+  --cs-sev-low: var(--sev-low, #059669);
+
+  --cs-dept-track: var(--dept-track, #1e40af);
+  --cs-dept-ohe: var(--dept-ohe, #b45309);
+  --cs-dept-sig: var(--dept-sig, #047857);
+
+  --cs-font: var(--font-main, 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif);
+  --cs-mono: var(--font-mono, 'JetBrains Mono', ui-monospace, Menlo, monospace);
+
+  --cs-card-bg: var(--card-bg, #0f172a);
+  --cs-card-border: var(--card-border, #1e293b);
+}
+
+/* Built-in dark palette, used only when the host app has not supplied one. */
+[data-theme='dark'] .cs-host,
+[data-theme='dark'] .hc-card,
+.cs-host[data-theme='dark'] {
+  --cs-surface: var(--bg-surface, #111827);
+  --cs-subtle: var(--bg-subtle, #16202e);
+  --cs-border: var(--border-color, #1f2937);
+  --cs-border-subtle: var(--border-subtle, #172032);
+  --cs-border-medium: var(--border-medium, #334155);
+  --cs-text: var(--text-primary, #f1f5f9);
+  --cs-text-2: var(--text-secondary, #cbd5e1);
+  --cs-text-muted: var(--text-muted, #94a3b8);
+  --cs-text-subtle: var(--text-subtle, #64748b);
+  --cs-primary: var(--color-primary, #93c5fd);
+  --cs-rail: var(--rail, #475569);
+  --cs-rail-strong: var(--rail-strong, #64748b);
+  --cs-tie: var(--tie, #64748b);
+  --cs-band: var(--band, #16202e);
+  --cs-sev-critical: var(--sev-critical, #f87171);
+  --cs-sev-high: var(--sev-high, #fbbf24);
+  --cs-sev-medium: var(--sev-medium, #60a5fa);
+  --cs-sev-low: var(--sev-low, #34d399);
+  --cs-card-bg: var(--card-bg, #020617);
+}
+
+/* ---- host -------------------------------------------------------------- */
+
+.cs-host {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--cs-surface);
+  border-bottom: 1px solid var(--cs-border);
+  font-family: var(--cs-font);
+  user-select: none;
+  overflow: hidden;
+  contain: layout paint;
+}
+
+.cs-host * { box-sizing: border-box; }
+.cs-host.is-live { cursor: crosshair; }
+
+/* ---- meta rail --------------------------------------------------------- */
+
+.cs-meta {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--cs-meta-h, 20px);
+  padding: 0 12px;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cs-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.cs-meta > * { min-width: 0; flex: none; }
+
+.cs-meta-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+  font-weight: 650;
+  color: var(--cs-text-2);
+  letter-spacing: 0.06em;
+}
+
+.cs-meta-sep { width: 1px; height: 9px; background: var(--cs-border-medium); }
+.cs-meta-spacer { flex: 1 1 auto; }
+
+.cs-legend { display: flex; align-items: center; gap: 9px; }
+
+.cs-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--cs-text-subtle);
+}
+
+.cs-legend-swatch {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.cs-readout {
+  font-family: var(--cs-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  color: var(--cs-text-muted);
+  min-width: 158px;
+  text-align: right;
+  text-transform: none;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.cs-host.is-live .cs-readout { opacity: 1; }
+
+.cs-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-family: var(--cs-mono);
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--cs-text-muted);
+  text-transform: none;
+}
+
+.cs-count b { font-size: 10.5px; font-weight: 600; color: var(--cs-text); }
+.cs-count.is-exec b { color: var(--cs-sev-critical); }
+
+/* ---- plot -------------------------------------------------------------- */
+
+.cs-plot {
+  position: absolute;
+  inset: var(--cs-meta-h, 20px) 0 var(--cs-ruler-h, 15px) 0;
+  z-index: 3;
+}
+
+/* Alternating section tint, so position reads zonally before any label does. */
+.cs-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--cs-band);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cs-rail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent 0,
+    var(--cs-rail) 10px,
+    var(--cs-rail) calc(100% - 10px),
+    transparent 100%
+  );
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.cs-rail-label {
+  position: absolute;
+  left: 3px;
+  font-family: var(--cs-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--cs-text-subtle);
+  transform: translateY(-50%);
+  pointer-events: none;
+  /* Above the marks: chrome should mask the compressed edge, not sit under it. */
+  z-index: 6;
+  background: var(--cs-surface);
+  padding: 0 3px;
+  border-radius: 2px;
+}
+
+/* Bloom that tracks the focus so the eye knows where the magnification is. */
+.cs-lens {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 300px;
+  margin-left: -150px;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    150px 100% at 50% 50%,
+    color-mix(in srgb, var(--cs-primary) 9%, transparent) 0%,
+    transparent 72%
+  );
+  z-index: 1;
+  will-change: transform, opacity;
+}
+
+/* ---- stations ---------------------------------------------------------- */
+
+.cs-station {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Two segments, so the code sits in the break rather than needing an opaque
+   chip that would punch a hole in the section band. */
+.cs-station-tie {
+  position: absolute;
+  width: 1.5px;
+  background: var(--cs-tie);
+  transform: translateX(-50%);
+  transition: background-color 0.2s ease;
+}
+
+.cs-station-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--cs-surface);
+  border: 3px solid var(--cs-primary);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.cs-station-code {
+  position: absolute;
+  left: 0;
+  font-family: var(--cs-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--cs-text-2);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+/* Hangs off the code so revealing it never re-centres the label. */
+.cs-station-km {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-left: 6px;
+  font-family: var(--cs-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--cs-text-subtle);
+  white-space: nowrap;
+  opacity: 0;
+}
+
+/* Near the right edge the chainage would be clipped, so it hangs off the
+   other side of the code instead. */
+.cs-station-km.is-flipped {
+  left: auto;
+  right: 100%;
+  margin-left: 0;
+  margin-right: 7px;
+}
+
+.cs-station.is-major .cs-station-dot { border-width: 3.5px; }
+.cs-station.is-major .cs-station-code { color: var(--cs-text); }
+
+.cs-station.is-hot .cs-station-dot {
+  border-color: var(--cs-primary);
+  background: var(--cs-primary);
+}
+.cs-station.is-hot .cs-station-code { color: var(--cs-text); }
+.cs-station.is-hot .cs-station-tie { background: var(--cs-primary); }
+
+/* ---- markers ----------------------------------------------------------- */
+
+.cs-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Scale target kept separate from .cs-mark so GSAP tweens never fight the
+   per-frame translate written by the ticker. */
+.cs-mark-inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: scale(1);
+}
+
+/* Real worksite extent (kmStart -> kmEnd). A couple of px until the lens
+   opens it up, then it reads as the true block length. */
+.cs-mark-span {
+  position: absolute;
+  left: 0;
+  top: -2.5px;
+  height: 5px;
+  min-width: 2px;
+  border-radius: 2.5px;
+  background: currentColor;
+  opacity: 0.24;
+}
+
+.cs-mark-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 2px var(--cs-surface);
+}
+
+.cs-mark-pulse {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  opacity: 0;
+}
+
+/* Priority drives the hue. */
+.cs-mark[data-priority='CRITICAL'] { color: var(--cs-sev-critical); }
+.cs-mark[data-priority='HIGH']     { color: var(--cs-sev-high); }
+.cs-mark[data-priority='MEDIUM']   { color: var(--cs-sev-medium); }
+.cs-mark[data-priority='LOW']      { color: var(--cs-sev-low); }
+
+/* Status drives the treatment. */
+.cs-mark[data-status='EXECUTING'] .cs-mark-pulse {
+  animation: cs-pulse-strong 1.7s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+  animation-delay: var(--cs-delay, 0s);
+}
+.cs-mark[data-status='EXECUTING'] .cs-mark-span { opacity: 0.5; }
+.cs-mark[data-status='EXECUTING'] .cs-mark-dot {
+  box-shadow: 0 0 0 2px var(--cs-surface), 0 0 8px 0 currentColor;
+}
+
+.cs-mark[data-status='SANCTIONED'] .cs-mark-pulse {
+  animation: cs-pulse-soft 3.4s ease-out infinite;
+  animation-delay: var(--cs-delay, 0s);
+}
+.cs-mark[data-status='SANCTIONED'] .cs-mark-span { opacity: 0.34; }
+
+.cs-mark[data-status='PENDING_REVIEW'] .cs-mark-dot {
+  background: var(--cs-surface);
+  border: 2px solid currentColor;
+  box-shadow: none;
+}
+.cs-mark[data-status='PENDING_REVIEW'] .cs-mark-pulse {
+  animation: cs-pulse-soft 2.9s ease-out infinite;
+  animation-delay: var(--cs-delay, 0s);
+}
+
+.cs-mark[data-status='COMPLETED'] { color: var(--cs-text-subtle); }
+.cs-mark[data-status='COMPLETED'] .cs-mark-dot {
+  width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+}
+.cs-mark[data-status='COMPLETED'] .cs-mark-span { opacity: 0.16; }
+
+.cs-mark[data-status='CANCELLED'] { color: var(--cs-border-medium); }
+.cs-mark[data-status='CANCELLED'] .cs-mark-dot {
+  width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  background: var(--cs-surface);
+  border: 1.5px solid currentColor;
+}
+.cs-mark[data-status='CANCELLED'] .cs-mark-span { opacity: 0.1; }
+
+.cs-mark-progress {
+  position: absolute;
+  left: 0;
+  top: -2.5px;
+  height: 5px;
+  border-radius: 2.5px;
+  background: currentColor;
+  opacity: 0.95;
+}
+
+.cs-mark.is-hot { z-index: 6; }
+.cs-mark.is-hot .cs-mark-dot {
+  box-shadow: 0 0 0 2.5px var(--cs-surface),
+              0 0 0 4.5px color-mix(in srgb, currentColor 40%, transparent);
+}
+.cs-mark.is-hot .cs-mark-span { opacity: 0.7; }
+
+/* Leader line from the hovered dot down towards its card. */
+.cs-mark-stem {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, currentColor, transparent);
+  transform: translateX(-50%) scaleY(0);
+  transform-origin: top;
+  opacity: 0;
+}
+
+@keyframes cs-pulse-strong {
+  0%   { opacity: 0.85; transform: scale(1); }
+  70%  { opacity: 0;    transform: scale(3); }
+  100% { opacity: 0;    transform: scale(3); }
+}
+
+@keyframes cs-pulse-soft {
+  0%   { opacity: 0.5; transform: scale(1); }
+  60%  { opacity: 0;   transform: scale(2.2); }
+  100% { opacity: 0;   transform: scale(2.2); }
+}
+
+/* ---- ruler ------------------------------------------------------------- */
+
+.cs-ruler {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--cs-ruler-h, 15px);
+  z-index: 2;
+  border-top: 1px solid var(--cs-border-subtle);
+}
+
+.cs-tick {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+.cs-tick-line {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 4px;
+  background: var(--cs-border-medium);
+  transform: translateX(-50%);
+}
+
+.cs-tick-label {
+  position: absolute;
+  top: 4px;
+  font-family: var(--cs-mono);
+  font-size: 8.5px;
+  color: var(--cs-text-subtle);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cs-cursor {
+  position: absolute;
+  top: var(--cs-meta-h, 20px);
+  bottom: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--cs-primary) 30%, transparent);
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Offscreen: hand the pulses back to the compositor's idle list. */
+.cs-host.is-dormant .cs-mark-pulse { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-mark-pulse { animation: none !important; opacity: 0.28; }
+}
+
+/* ==========================================================================
+   Hover card — portalled to <body>, positioned imperatively.
+   ========================================================================== */
+
+.hc-card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9000;
+  font-family: var(--cs-font);
+  will-change: transform;
+}
+
+.hc-inner {
+  position: relative;
+  background: var(--cs-card-bg);
+  border: 1px solid var(--cs-card-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.28);
+  padding: 11px 13px 10px;
+  color: #f8fafc;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.hc-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+
+.hc-id {
+  font-family: var(--cs-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.hc-chip {
+  margin-left: auto;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.hc-sev-critical { background: rgba(220, 38, 38, 0.18); color: #fca5a5; }
+.hc-sev-high     { background: rgba(217, 119, 6, 0.2);  color: #fcd34d; }
+.hc-sev-medium   { background: rgba(37, 99, 235, 0.2);  color: #93c5fd; }
+.hc-sev-low      { background: rgba(5, 150, 105, 0.2);  color: #6ee7b7; }
+.hc-neutral      { background: rgba(148, 163, 184, 0.16); color: #cbd5e1; }
+
+.hc-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #f8fafc;
+  margin-bottom: 6px;
+}
+
+.hc-statusline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 9px;
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+}
+
+.hc-dot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+.hc-st-executing      { background: #f87171; box-shadow: 0 0 7px #f87171; }
+.hc-st-sanctioned     { background: #60a5fa; }
+.hc-st-pending_review { background: transparent; border: 1.5px solid #94a3b8; }
+.hc-st-completed      { background: #34d399; }
+.hc-st-cancelled      { background: #475569; }
+
+.hc-status { color: #e2e8f0; font-weight: 500; }
+
+.hc-line-tag {
+  font-family: var(--cs-mono);
+  font-size: 8.5px;
+  color: #94a3b8;
+  border: 1px solid #1e293b;
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
+.hc-memo {
+  font-family: var(--cs-mono);
+  font-size: 8.5px;
+  color: #64748b;
+  margin-left: auto;
+}
+
+.hc-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+
+.hc-progress-track {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: #1e293b;
+  overflow: hidden;
+}
+
+.hc-progress-fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  border-radius: 2px;
+  background: linear-gradient(to right, #f87171, #fbbf24);
+}
+
+.hc-progress-pct {
+  font-family: var(--cs-mono);
+  font-size: 9px;
+  color: #fca5a5;
+  font-variant-numeric: tabular-nums;
+}
+
+.hc-grid {
+  display: grid;
+  gap: 2px;
+  padding-top: 8px;
+  border-top: 1px solid #1e293b;
+}
+
+.hc-row { display: flex; align-items: baseline; gap: 10px; }
+
+.hc-k {
+  flex: none;
+  width: 84px;
+  font-size: 9.5px;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+.hc-v {
+  flex: 1;
+  font-size: 10.5px;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hc-flags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 9px; }
+
+.hc-flag {
+  font-size: 8.5px;
+  letter-spacing: 0.03em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+}
+
+.hc-flag.is-power { background: rgba(217, 119, 6, 0.22); color: #fcd34d; }
+.hc-flag.is-disc  { background: rgba(139, 92, 246, 0.22); color: #c4b5fd; }
+
+.hc-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid #1e293b;
+  font-size: 9.5px;
+  color: #94a3b8;
+}
+
+.hc-dept { width: 3px; height: 11px; border-radius: 2px; flex: none; }
+
+.hc-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  display: none;
+  font-family: var(--cs-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  padding: 1px 5px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.hc-close:hover { color: #e2e8f0; background: rgba(148, 163, 184, 0.2); }
+
+.hc-card.is-pinned .hc-close { display: block; }
+.hc-card.is-pinned .hc-inner {
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(147, 197, 253, 0.35);
+}

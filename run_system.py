@@ -12,6 +12,17 @@ import os
 import sys
 import subprocess
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+if hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 # Auto-detect if current Python environment lacks dependencies (e.g. default Python 3.14 vs Python 3.13)
 try:
     import uvicorn
@@ -89,12 +100,12 @@ def main():
         pass
 
     print("\n" + "=" * 80)
-    print("  ALL SYSTEMS READY • 4-PORTAL ENTERPRISE CONTROL NETWORK ACTIVE")
+    print("  ALL SYSTEMS READY - 4-PORTAL ENTERPRISE CONTROL NETWORK ACTIVE")
     print("=" * 80)
-    print(f"  🏢 Central OCC Master Desk:  http://127.0.0.1:8000/  (or http://{local_ip}:8000/)")
-    print(f"  🔨 Civil / Track (TMS):      http://127.0.0.1:8000/tms")
-    print(f"  ⚡ Traction / OHE (TDMS):    http://127.0.0.1:8000/tdms")
-    print(f"  🟢 Signal & Telecom (SMMS):  http://127.0.0.1:8000/smms")
+    print(f"  [OCC]  Central OCC Master Desk:  http://127.0.0.1:8000/  (or http://{local_ip}:8000/)")
+    print(f"  [TMS]  Civil / Track (TMS):      http://127.0.0.1:8000/tms")
+    print(f"  [TDMS] Traction / OHE (TDMS):    http://127.0.0.1:8000/tdms")
+    print(f"  [SMMS] Signal & Telecom (SMMS):  http://127.0.0.1:8000/smms")
     print("=" * 80)
     print("  Multi-device LAN access enabled. Open any portal above on phones/tablets.")
     print("  Press Ctrl+C to stop the server.\n")

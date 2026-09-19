@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corridor Strip · UI Kit Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./corridor-strip.css">
+<style>
+    /* The app's own tokens, as in style.css. The strip reads these if present. */
+    :root {
+        --bg-base: #f8fafc;
+        --bg-surface: #ffffff;
+        --bg-surface-subtle: #f1f5f9;
+        --border-color: #e2e8f0;
+        --text-primary: #0f172a;
+        --text-secondary: #334155;
+        --text-muted: #64748b;
+        --text-subtle: #94a3b8;
+        --color-primary: #0f2b5c;
+        --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+    }
+    :root[data-theme="dark"] {
+        --bg-base: #0b1120;
+        --bg-surface: #111827;
+        --bg-surface-subtle: #16202e;
+        --border-color: #1f2937;
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
+        --text-subtle: #64748b;
+        --color-primary: #93c5fd;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: var(--font-main);
+        background: var(--bg-base);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+    .app-header {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 22px;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .crest {
+        width: 26px; height: 26px; border-radius: 6px;
+        background: var(--color-primary); color: var(--bg-surface);
+        display: grid; place-items: center;
+        font-size: 10px; font-weight: 800; letter-spacing: 0.04em;
+    }
+    .app-header h1 { font-size: 0.85rem; font-weight: 700; }
+    .app-header .sub { font-size: 0.68rem; color: var(--text-muted); }
+    .controls { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .controls label { font-size: 0.62rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.08em; }
+    .controls select, .controls button {
+        font: inherit; font-size: 0.7rem; font-weight: 600;
+        padding: 5px 10px; border-radius: 6px;
+        border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-secondary);
+        cursor: pointer;
+    }
+
+    /* The host: full width, the strip sets its own height. */
+    #corridor { width: 100%; }
+
+    .demo-wrap { padding: 24px 22px 80px; max-width: 1100px; }
+    .demo-wrap h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .demo-wrap p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.55; max-width: 720px; }
+    .card {
+        margin-top: 16px; background: var(--bg-surface);
+        border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 16px;
+    }
+    .card h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-subtle); margin-bottom: 8px; }
+    pre {
+        font-family: var(--font-mono); font-size: 0.7rem; line-height: 1.6;
+        color: var(--text-secondary); white-space: pre-wrap; word-break: break-word;
+    }
+    #picked { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-secondary); min-height: 20px; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+    <div class="crest">IR</div>
+    <div>
+        <h1>Automatic Block Planning</h1>
+        <div class="sub">Corridor Strip · ui-kit demo</div>
+    </div>
+    <div class="controls">
+        <label for="line">Line</label>
+        <select id="line">
+            <option value="ALL">All</option>
+            <option value="UP">UP</option>
+            <option value="DN">DN</option>
+        </select>
+        <button id="theme">Dark</button>
+    </div>
+</header>
+
+<!-- ▼ the strip -->
+<div id="corridor"></div>
+
+<div class="demo-wrap">
+    <h2>What this page does</h2>
+    <p>
+        Hover the strip to open the lens. Hover a dot for its card, click to pin, <kbd>Esc</kbd> to release.
+        The dots come from <em>raw</em> API-shaped records (<code>worker_requests.json</code> and
+        <code>pending_demands.json</code>) run through <code>CORRIDOR_MAP</code> — so what you see is
+        the integration path, not pre-cooked data.
+    </p>
+
+    <div class="card">
+        <h3>Pinned</h3>
+        <div id="picked">Nothing pinned.</div>
+    </div>
+
+    <div class="card">
+        <h3>The whole integration</h3>
+<pre>&lt;link rel="stylesheet" href="/static/ui-kit/corridor-strip/corridor-strip.css"&gt;
+&lt;div id="corridor"&gt;&lt;/div&gt;
+
+&lt;script src="/static/ui-kit/corridor-strip/corridor-strip.js"&gt;&lt;/script&gt;
+&lt;script src="/static/ui-kit/corridor-strip/corridor.presets.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  var preset = CORRIDOR_PRESETS['ndls-cnb'];
+  var strip = CorridorStrip.create('#corridor', {
+    stations: preset.stations,
+    totalKm:  preset.totalKm,
+    label:    preset.label,
+    markers:  requests.map(CORRIDOR_MAP.request)
+                .concat(demands.map(CORRIDOR_MAP.demand)),
+    onSelect: function (m) { /* m is the pinned marker, or null */ }
+  });
+
+  // later:
+  strip.setMarkers(newMarkers);
+&lt;/script&gt;</pre>
+    </div>
+</div>
+
+<script src="./corridor-strip.js"></script>
+<script src="./corridor.presets.js"></script>
+<script src="./demo-data.js"></script>
+<script>
+    var preset = CORRIDOR_PRESETS['ndls-cnb'];
+
+    var allMarkers = DEMO_REQUESTS.map(CORRIDOR_MAP.request)
+        .concat(DEMO_DEMANDS.map(CORRIDOR_MAP.demand));
+
+    var strip = CorridorStrip.create('#corridor', {
+        stations: preset.stations,
+        totalKm: preset.totalKm,
+        label: preset.label,
+        markers: allMarkers,
+        onSelect: function (m) {
+            document.getElementById('picked').textContent = m
+                ? m.id + '  ·  ' + m.section + '  ·  ' + m.kmStart.toFixed(2) + '–' + m.kmEnd.toFixed(2) + ' km  ·  ' + m.line
+                : 'Nothing pinned.';
+        }
+    });
+
+    document.getElementById('line').addEventListener('change', function () {
+        var v = this.value;
+        strip.setMarkers(v === 'ALL' ? allMarkers : allMarkers.filter(function (m) { return m.line === v; }));
+    });
+
+    document.getElementById('theme').addEventListener('click', function () {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+        this.textContent = dark ? 'Dark' : 'Light';
+    });
+</script>
+</body>
+</html>
