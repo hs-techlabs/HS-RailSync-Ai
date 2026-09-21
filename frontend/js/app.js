@@ -4,7 +4,7 @@
  * OR-Tools CP-SAT bundling, SHAP waterfall cards, live asset searching, and KPI updates.
  */
 
-const API_BASE = "";
+const API_BASE = (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
 let currentScheduleData = null;
 let currentTimetableData = null;
 let currentTopologyData = null;

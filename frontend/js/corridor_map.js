@@ -40,10 +40,11 @@
 const CorridorMap = (function () {
     "use strict";
 
+    const getBase = () => (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
     const API = {
-        geometry: "/api/map/geometry",
-        layers: "/api/map/layers",
-        trains: "/api/map/trains"
+        get geometry() { return `${getBase()}/api/map/geometry`; },
+        get layers() { return `${getBase()}/api/map/layers`; },
+        get trains() { return `${getBase()}/api/map/trains`; }
     };
 
     const TILES = {

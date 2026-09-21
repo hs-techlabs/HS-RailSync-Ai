@@ -51,11 +51,17 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
-# Mount static frontend files
-frontend_dir = os.path.join(ROOT_DIR, "src", "frontend")
-if os.path.exists(frontend_dir):
+# Mount static frontend files if present (supports local development and standalone mode)
+possible_frontend_dirs = [
+    os.path.abspath(os.path.join(ROOT_DIR, "..", "frontend")),
+    os.path.join(ROOT_DIR, "frontend"),
+    os.path.join(ROOT_DIR, "src", "frontend")
+]
+frontend_dir = next((d for d in possible_frontend_dirs if os.path.exists(d)), None)
+if frontend_dir and os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 
 # Field-evidence attachments (photos / inspection PDFs referenced by worker
@@ -91,12 +97,24 @@ def get_explainability_engine():
     return explainability_engine
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 def serve_dashboard():
-    index_file = os.path.join(frontend_dir, "index.html")
-    if os.path.exists(index_file):
-        return FileResponse(index_file)
-    return HTMLResponse("<h1>Indian Railways AI Automatic Block Planner API is Running</h1>")
+    if frontend_dir:
+        index_file = os.path.join(frontend_dir, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+    return JSONResponse({
+        "status": "online",
+        "service": "Indian Railways AI Automatic Block Planning System Backend",
+        "docs": "/docs",
+        "endpoints": {
+            "optimal_schedule": "/api/schedule/optimal",
+            "weekly_schedule": "/api/schedule/weekly",
+            "monthly_schedule": "/api/schedule/monthly",
+            "assets_health": "/api/assets/health",
+            "topology": "/api/corridor/topology"
+        }
+    })
 
 
 @app.get("/api/corridor/topology")
@@ -380,25 +398,28 @@ async def upload_custom_csv(file: UploadFile = File(...)):
 
 @app.get("/tms", response_class=HTMLResponse)
 def serve_tms_portal():
-    tms_file = os.path.join(frontend_dir, "tms.html")
-    if os.path.exists(tms_file):
-        return FileResponse(tms_file)
+    if frontend_dir:
+        tms_file = os.path.join(frontend_dir, "tms.html")
+        if os.path.exists(tms_file):
+            return FileResponse(tms_file)
     return HTMLResponse("<h1>Track Management System (TMS) Portal</h1>")
 
 
 @app.get("/tdms", response_class=HTMLResponse)
 def serve_tdms_portal():
-    tdms_file = os.path.join(frontend_dir, "tdms.html")
-    if os.path.exists(tdms_file):
-        return FileResponse(tdms_file)
+    if frontend_dir:
+        tdms_file = os.path.join(frontend_dir, "tdms.html")
+        if os.path.exists(tdms_file):
+            return FileResponse(tdms_file)
     return HTMLResponse("<h1>Traction Distribution Management System (TDMS) Portal</h1>")
 
 
 @app.get("/smms", response_class=HTMLResponse)
 def serve_smms_portal():
-    smms_file = os.path.join(frontend_dir, "smms.html")
-    if os.path.exists(smms_file):
-        return FileResponse(smms_file)
+    if frontend_dir:
+        smms_file = os.path.join(frontend_dir, "smms.html")
+        if os.path.exists(smms_file):
+            return FileResponse(smms_file)
     return HTMLResponse("<h1>Signal Maintenance Management System (SMMS) Portal</h1>")
 
 

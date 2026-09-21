@@ -1,0 +1,16 @@
+[Unit]
+Description=Indian Railways AI Automatic Block Planning FastAPI Server
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/Railways-Final/backend
+Environment="PATH=/home/ubuntu/Railways-Final/backend/venv/bin"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/home/ubuntu/Railways-Final/backend/venv/bin/python run_system.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

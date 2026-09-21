@@ -7,7 +7,7 @@
  * S&T/T-351 disconnection-notice column, and the disconnection memo.
  */
 
-const API_BASE = "";
+const API_BASE = (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
 
 document.addEventListener("DOMContentLoaded", () => {
     initSimClock("smms-sim-clock");

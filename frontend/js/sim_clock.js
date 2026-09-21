@@ -30,7 +30,8 @@ function _renderSimClock() {
 
 async function _syncSimClock() {
     try {
-        const res = await fetch("/api/clock/now");
+        const base = (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
+        const res = await fetch(`${base}/api/clock/now`);
         const data = await res.json();
         simClockBaseMs = new Date(data.sim_time).getTime();
         simClockSyncedAt = performance.now();
@@ -114,8 +115,9 @@ function showToast(severity, title, message, icon) {
 
 async function pollNotifications() {
     try {
+        const base = (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
         const res = await fetch(
-            `/api/events/feed?department=${encodeURIComponent(notifyDepartment)}&after_seq=${notifyLastSeq}`
+            `${base}/api/events/feed?department=${encodeURIComponent(notifyDepartment)}&after_seq=${notifyLastSeq}`
         );
         const data = await res.json();
         const events = data.events || [];

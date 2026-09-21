@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Traction Distribution Management System (TDMS) | Indian Railways RailSaver Portal</title>
+    <title>Signal Maintenance Management System (SMMS) | Indian Railways Signalling & Telecom Portal</title>
     <link rel="stylesheet" href="/static/css/style.css?v=portal_v3">
     <link rel="stylesheet" href="/static/css/corridor_map.css?v=portal_v3">
     <link rel="stylesheet" href="/static/css/occ_redesign.css?v=portal_v3">
@@ -16,23 +16,23 @@
 <body class="portal-page-body" data-theme="light">
     <div class="portal-container">
         <!-- Portal Header -->
-        <header class="portal-header portal-header-tdms">
+        <header class="portal-header portal-header-smms">
             <div class="portal-brand">
-                <div class="portal-crest portal-crest-tdms">TDMS</div>
+                <div class="portal-crest portal-crest-smms">SMMS</div>
                 <div class="portal-title-group">
                     <h1>
-                        <!-- Fluent Flash 24 Regular -->
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                        TRACTION DISTRIBUTION MANAGEMENT SYSTEM &bull; RAILSAVER TRD PORTAL
+                        <!-- Fluent Radio 24 Regular -->
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+                        SIGNAL MAINTENANCE MANAGEMENT SYSTEM &bull; SMMS S&amp;T PORTAL
                     </h1>
-                    <p>Northern &amp; North Central Railway &bull; 25 kV AC OHE &amp; Power Block Requisition Desk (Sr. DEE / TRD)</p>
+                    <p>Northern &amp; North Central Railway &bull; Electronic Interlocking &amp; Disconnection Desk (Sr. DSTE / SMMS)</p>
                 </div>
             </div>
             <div class="portal-header-actions">
-                <span class="sim-clock-badge" id="tdms-sim-clock" title="Accelerated corridor clock">&#9201; --:--:--</span>
+                <span class="sim-clock-badge" id="smms-sim-clock" title="Accelerated corridor clock">&#9201; --:--:--</span>
                 <span class="corridor-badge">
-                    <span class="pulse-dot" style="background:#b45309;"></span>
-                    <span>25 kV AC 50 Hz ELECTRIFIED TRUNK</span>
+                    <span class="pulse-dot" style="background:#047857;"></span>
+                    <span>QUAD-ASPECT AUTO SIGNALLING</span>
                 </span>
                 <a href="/" class="btn-portal-back">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -45,15 +45,15 @@
         <div class="portal-card" style="margin-bottom:18px;">
             <div class="portal-card-header">
                 <h2>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16M16 6v16"/></svg>
-                    Corridor Track Map &mdash; OHE Issues, Asset Wear &amp; Approved Power Cuts
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16M16 6v16"/></svg>
+                    Corridor Track Map &mdash; S&amp;T Issues &amp; Track System Health
                 </h2>
                 <span style="font-size:0.75rem; color:var(--text-muted);">
                     Hover a marker for details &bull; Inspect to raise a block requisition
                 </span>
             </div>
             <div class="portal-card-body" style="padding:0;">
-                <div id="tdms-corridor-map"></div>
+                <div id="smms-corridor-map"></div>
             </div>
         </div>
 
@@ -63,17 +63,17 @@
             <div class="portal-card">
                 <div class="portal-card-header">
                     <h2>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                        OHE Field Reports &mdash; Pending Officer Review
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        S&amp;T Field Reports &mdash; Pending Officer Review
                     </h2>
-                    <span class="badge-val" id="tdms-review-count">0 Awaiting</span>
+                    <span class="badge-val" id="smms-review-count">0 Awaiting</span>
                 </div>
                 <div class="portal-card-body">
                     <p style="font-size:0.74rem; color:var(--text-muted); margin:0 0 12px 0;">
-                        Submitted by TRD linemen gangs &amp; OHE patrol inspectors. Verify the attached site evidence, then approve to forward
+                        Submitted by signal maintainer gangs &amp; S&amp;T field technicians. Verify the attached site evidence, then approve to forward
                         the requisition to the Central OCC (BDMS) desk for block sanction.
                     </p>
-                    <div class="review-queue" id="tdms-review-queue">
+                    <div class="review-queue" id="smms-review-queue">
                         <div class="review-queue-empty">Awaiting field reports from the corridor&hellip;</div>
                     </div>
                 </div>
@@ -83,33 +83,33 @@
             <div class="portal-card">
                 <div class="portal-card-header">
                     <h2>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                        My OHE Requisitions &amp; Traction Power Permits
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        My S&amp;T Requisitions &amp; Disconnection Approvals
                     </h2>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="font-size:0.75rem; color:var(--text-muted);">Auto-refreshing (5s)</span>
-                        <button class="btn-portal-back" style="padding:4px 8px;" onclick="loadTDMSDemands()">&#8635; Refresh</button>
+                        <button class="btn-portal-back" style="padding:4px 8px;" onclick="loadSMMSDemands()">&#8635; Refresh</button>
                     </div>
                 </div>
                 <div class="portal-card-body" style="padding:0;">
                     <div style="overflow-x:auto;">
-                        <table class="data-table" id="tdms-demands-table">
+                        <table class="data-table" id="smms-demands-table">
                             <thead>
                                 <tr>
                                     <th>Demand ID</th>
                                     <th>Section &amp; Line</th>
-                                    <th>OHE Defect / Task</th>
-                                    <th>Machinery &amp; Crew</th>
+                                    <th>S&amp;T Defect / Asset</th>
+                                    <th>Technician Crew</th>
                                     <th>Duration</th>
-                                    <th>25 kV Power Permit</th>
+                                    <th>Disconnection Notice</th>
                                     <th>Status</th>
                                     <th>Sanctioned Window</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="tdms-demands-tbody">
+                            <tbody id="smms-demands-tbody">
                                 <tr>
-                                    <td colspan="9" style="text-align:center; padding:30px; color:var(--text-muted);">Loading active OHE requisitions...</td>
+                                    <td colspan="9" style="text-align:center; padding:30px; color:var(--text-muted);">Loading active S&amp;T requisitions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -122,13 +122,13 @@
         <div class="portal-card" style="margin-top:18px;">
             <div class="portal-card-header">
                 <h2>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    Recently Reviewed OHE Field Reports
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Recently Reviewed S&amp;T Field Reports
                 </h2>
                 <span style="font-size:0.75rem; color:var(--text-muted);">Last 15 decisions</span>
             </div>
             <div class="portal-card-body">
-                <div class="review-history-list" id="tdms-review-history">
+                <div class="review-history-list" id="smms-review-history">
                     <div class="review-queue-empty">No reports reviewed yet.</div>
                 </div>
             </div>
@@ -139,7 +139,7 @@
     <div class="modal-overlay" id="memo-view-modal" style="display:none;">
         <div class="modal-card" style="max-width:750px;">
             <div class="modal-header">
-                <h3 id="memo-modal-title">Official BDMS Traction Power Sanction Order</h3>
+                <h3 id="memo-modal-title">Official BDMS S&amp;T Disconnection Sanction Order</h3>
                 <button class="modal-close" onclick="document.getElementById('memo-view-modal').style.display='none'">&times;</button>
             </div>
             <div class="modal-body">
@@ -160,10 +160,11 @@
         </div>
     </div>
 
+    <script src="/config.js"></script>
     <script src="/static/js/sim_clock.js?v=portal_v3"></script>
     <script src="/static/js/portal_review.js?v=portal_v3"></script>
     <script src="/static/js/corridor_map.js?v=portal_v3"></script>
     <script src="/static/js/block_request.js?v=portal_v3"></script>
-    <script src="/static/js/tdms_portal.js?v=portal_v3"></script>
+    <script src="/static/js/smms_portal.js?v=portal_v3"></script>
 </body>
 </html>

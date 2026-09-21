@@ -4,6 +4,7 @@
  * signal aspects, layer visibility toggles, pan/zoom controls, and diagnostic telemetry.
  */
 
+const API_BASE = (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
 let currentYardData = null;
 let currentZoomScale = 1.0;
 let yardLayers = {

@@ -1,0 +1,5 @@
+# Cloudflare Pages Routing Rules
+/static/*  /:splat   200
+/tms       /tms.html 200
+/tdms      /tdms.html 200
+/smms      /smms.html 200

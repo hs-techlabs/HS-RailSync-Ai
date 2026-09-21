@@ -243,7 +243,8 @@ const BlockRequestForm = (function () {
         };
 
         try {
-            const res = await fetch(`/api/worker_requests/${requestId}/approve`, {
+            const base = (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
+            const res = await fetch(`${base}/api/worker_requests/${requestId}/approve`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)

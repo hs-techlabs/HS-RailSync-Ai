@@ -10,6 +10,8 @@
  * table and sanction-memo code.
  */
 
+const getBase = () => (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
+
 let reviewConfig = {
     department: "ALL",
     prefix: "tms",
@@ -88,7 +90,7 @@ function openAttachmentModal(url, type, filename) {
 
 async function loadPendingWorkerRequests() {
     try {
-        const res = await fetch(`/api/worker_requests/pending?department=${reviewConfig.department}`);
+        const res = await fetch(`${getBase()}/api/worker_requests/pending?department=${reviewConfig.department}`);
         const data = await res.json();
         renderReviewQueue(data.requests || []);
 
@@ -160,7 +162,7 @@ function _lockCard(btn, label) {
 async function approveWorkerRequest(requestId, btn) {
     _lockCard(btn, "Forwarding…");
     try {
-        const res = await fetch(`/api/worker_requests/${requestId}/approve`, {
+        const res = await fetch(`${getBase()}/api/worker_requests/${requestId}/approve`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -186,7 +188,7 @@ async function rejectWorkerRequest(requestId, btn) {
     if (!confirm("Reject this field report? It will not be forwarded to the Central OCC.")) return;
     _lockCard(btn, "Rejecting…");
     try {
-        const res = await fetch(`/api/worker_requests/${requestId}/reject`, {
+        const res = await fetch(`${getBase()}/api/worker_requests/${requestId}/reject`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -216,7 +218,7 @@ async function loadReviewHistory() {
     if (!container) return;
 
     try {
-        const res = await fetch(`/api/worker_requests/history?department=${reviewConfig.department}`);
+        const res = await fetch(`${getBase()}/api/worker_requests/history?department=${reviewConfig.department}`);
         const data = await res.json();
         const requests = data.requests || [];
 

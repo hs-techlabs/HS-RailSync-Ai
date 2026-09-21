@@ -1,0 +1,2645 @@
+{
+  "requests": [
+    {
+      "request_id": "WREQ-TRK-FB4183EF",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0645",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "KRJ",
+      "section_to": "ALJN",
+      "section_label": "KRJ - ALJN",
+      "line": "DN",
+      "km_start": 98.79,
+      "km_end": 100.04,
+      "machine_required": "MANUAL",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang B",
+      "duration_requested_min": 168,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 73.6, USFD: CLEAR)",
+      "failure_percentage": 0.1,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang B",
+      "submitted_at": "2026-09-21T05:01:41.078949",
+      "status": "APPROVED_FORWARDED",
+      "review_note": "Site evidence verified; forwarded to Central OCC for block sanction.",
+      "reviewed_at": "2026-09-21T05:54:12.899456",
+      "reviewed_by": "Department Officer"
+    },
+    {
+      "request_id": "WREQ-OHE-1F3DD91E",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0038",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "DER",
+      "section_to": "KRJ",
+      "section_label": "DER - KRJ",
+      "line": "DN",
+      "km_start": 58.86,
+      "km_end": 59.65,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "OHE Patrol Inspector",
+      "duration_requested_min": 154,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 42.9%, ATD: NORMAL)",
+      "failure_percentage": 0.4,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "OHE Patrol Inspector",
+      "submitted_at": "2026-09-21T05:01:41.184788",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-0D377DF8",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0148",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "TDL",
+      "section_to": "TDL",
+      "section_label": "TDL Station Yard",
+      "line": "DN",
+      "km_start": 208.18,
+      "km_end": 208.28,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "LOW",
+      "description": "Signal maintenance (POINT_MACHINE at TDL, Tier: LOW)",
+      "failure_percentage": 1.8,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T05:01:41.286144",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-CA956212",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0250",
+      "defect_category": "Routine Track Patrol Observation",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "UP",
+      "km_start": 278.55,
+      "km_end": 279.72,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang C",
+      "duration_requested_min": 151,
+      "priority": "LOW",
+      "description": "Track maintenance (GOOD TGI 85.1, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang C",
+      "submitted_at": "2026-09-21T05:00:05.373268",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-304DC34E",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0164",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "UP",
+      "km_start": 272.41,
+      "km_end": 273.26,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang A",
+      "duration_requested_min": 161,
+      "priority": "HIGH",
+      "description": "OHE maintenance (Wire wear 80.5%, ATD: NORMAL)",
+      "failure_percentage": 54.3,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang A",
+      "submitted_at": "2026-09-21T05:00:05.536880",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-A846C750",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0154",
+      "defect_category": "Track Circuit Fault",
+      "section_from": "NDLS",
+      "section_to": "NDLS",
+      "section_label": "NDLS Station Yard",
+      "line": "DN",
+      "km_start": 0.0,
+      "km_end": 0.1,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "MEDIUM",
+      "description": "Signal maintenance (TRACK_CIRCUIT at NDLS, Tier: MEDIUM)",
+      "failure_percentage": 39.0,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T05:00:05.728092",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-B6CAE6BD",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0575",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "NDLS",
+      "section_to": "GZB",
+      "section_label": "NDLS - GZB",
+      "line": "UP",
+      "km_start": 14.23,
+      "km_end": 15.23,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang C",
+      "duration_requested_min": 154,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 75.8, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang C",
+      "submitted_at": "2026-09-21T05:00:05.545692",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-FF954E74",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0028",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "UP",
+      "km_start": 228.81,
+      "km_end": 229.37,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 159,
+      "priority": "CRITICAL",
+      "description": "OHE maintenance (Wire wear 84.0%, ATD: NORMAL)",
+      "failure_percentage": 99.9,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T05:00:05.718899",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-CA63DAE2",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0320",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "ETW",
+      "section_to": "ETW",
+      "section_label": "ETW Station Yard",
+      "line": "DN",
+      "km_start": 301.51,
+      "km_end": 301.61,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "Signal Maintainer Gang B",
+      "duration_requested_min": 150,
+      "priority": "LOW",
+      "description": "Signal maintenance (POINT_MACHINE at ETW, Tier: LOW)",
+      "failure_percentage": 6.0,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang B",
+      "submitted_at": "2026-09-21T05:00:05.877934",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-0611D894",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0556",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "DN",
+      "km_start": 271.18,
+      "km_end": 272.66,
+      "machine_required": "MANUAL",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "PWI Field Inspector",
+      "duration_requested_min": 171,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 73.1, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "PWI Field Inspector",
+      "submitted_at": "2026-09-21T05:45:49.068813",
+      "status": "APPROVED_FORWARDED",
+      "review_note": "Site evidence verified; forwarded to Central OCC for block sanction.",
+      "reviewed_at": "2026-09-21T05:50:10.142555",
+      "reviewed_by": "Department Officer"
+    },
+    {
+      "request_id": "WREQ-OHE-F00D4675",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0494",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "NDLS",
+      "section_to": "GZB",
+      "section_label": "NDLS - GZB",
+      "line": "UP",
+      "km_start": 3.15,
+      "km_end": 3.88,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 157,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 54.1%, ATD: NORMAL)",
+      "failure_percentage": 0.4,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T05:45:49.256897",
+      "status": "APPROVED_FORWARDED",
+      "review_note": "Site evidence verified; forwarded to Central OCC for block sanction.",
+      "reviewed_at": "2026-09-21T06:08:46.284084",
+      "reviewed_by": "Department Officer"
+    },
+    {
+      "request_id": "WREQ-SIG-34926E8C",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0199",
+      "defect_category": "Electronic Interlocking Alarm",
+      "section_from": "PHD",
+      "section_to": "PHD",
+      "section_label": "PHD Station Yard",
+      "line": "UP",
+      "km_start": 356.88,
+      "km_end": 356.98,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "MEDIUM",
+      "description": "Signal maintenance (EI_SYSTEM at PHD, Tier: MEDIUM)",
+      "failure_percentage": 32.7,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T05:45:49.462814",
+      "status": "APPROVED_FORWARDED",
+      "review_note": "Site evidence verified; forwarded to Central OCC for block sanction.",
+      "reviewed_at": "2026-09-21T06:28:32.959785",
+      "reviewed_by": "Department Officer"
+    },
+    {
+      "request_id": "WREQ-TRK-DF446591",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0483",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "DN",
+      "km_start": 257.34,
+      "km_end": 258.36,
+      "machine_required": "TAMPING",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "PWI Field Inspector",
+      "duration_requested_min": 181,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 64.5, USFD: CLEAR)",
+      "failure_percentage": 0.6,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "PWI Field Inspector",
+      "submitted_at": "2026-09-21T06:18:37.349777",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-ACDDA4FA",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0350",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "FZD",
+      "section_to": "FZD",
+      "section_label": "FZD Station Yard",
+      "line": "UP",
+      "km_start": 227.48,
+      "km_end": 227.58,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "LOW",
+      "description": "Signal maintenance (POINT_MACHINE at FZD, Tier: LOW)",
+      "failure_percentage": 1.4,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T06:18:37.861862",
+      "status": "APPROVED_FORWARDED",
+      "review_note": "Site evidence verified; forwarded to Central OCC for block sanction.",
+      "reviewed_at": "2026-09-21T06:22:40.909519",
+      "reviewed_by": "Department Officer"
+    },
+    {
+      "request_id": "WREQ-TRK-BABE555D",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0035",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "KRJ",
+      "section_to": "ALJN",
+      "section_label": "KRJ - ALJN",
+      "line": "DN",
+      "km_start": 92.38,
+      "km_end": 94.26,
+      "machine_required": "TAMPING",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang C",
+      "duration_requested_min": 183,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 61.5, USFD: CLEAR)",
+      "failure_percentage": 0.4,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang C",
+      "submitted_at": "2026-09-21T07:04:18.290482",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-A7935576",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0395",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "TDL",
+      "section_to": "FZD",
+      "section_label": "TDL - FZD",
+      "line": "DN",
+      "km_start": 213.15,
+      "km_end": 213.72,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang A",
+      "duration_requested_min": 151,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 44.9%, ATD: NORMAL)",
+      "failure_percentage": 0.3,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang A",
+      "submitted_at": "2026-09-21T07:04:18.890972",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-01C7A075",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0368",
+      "defect_category": "Track Circuit Fault",
+      "section_from": "GZB",
+      "section_to": "GZB",
+      "section_label": "GZB Station Yard",
+      "line": "DN",
+      "km_start": 24.42,
+      "km_end": 24.52,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang B",
+      "duration_requested_min": 150,
+      "priority": "MEDIUM",
+      "description": "Signal maintenance (TRACK_CIRCUIT at GZB, Tier: MEDIUM)",
+      "failure_percentage": 32.0,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang B",
+      "submitted_at": "2026-09-21T07:04:19.263363",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-36A2E4B0",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0407",
+      "defect_category": "Routine Track Patrol Observation",
+      "section_from": "PHD",
+      "section_to": "CNB",
+      "section_label": "PHD - CNB",
+      "line": "UP",
+      "km_start": 360.21,
+      "km_end": 361.57,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang A",
+      "duration_requested_min": 151,
+      "priority": "LOW",
+      "description": "Track maintenance (GOOD TGI 87.7, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang A",
+      "submitted_at": "2026-09-21T07:37:10.106316",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-329D158A",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0164",
+      "defect_category": "Track Circuit Fault",
+      "section_from": "DER",
+      "section_to": "DER",
+      "section_label": "DER Station Yard",
+      "line": "UP",
+      "km_start": 37.34,
+      "km_end": 37.44,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "HIGH",
+      "description": "Signal maintenance (TRACK_CIRCUIT at DER, Tier: HIGH)",
+      "failure_percentage": 57.9,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T07:37:10.265694",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-EAC9E61F",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0842",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "PHD",
+      "section_to": "CNB",
+      "section_label": "PHD - CNB",
+      "line": "UP",
+      "km_start": 389.29,
+      "km_end": 389.99,
+      "machine_required": "MANUAL",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang C",
+      "duration_requested_min": 173,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 55.2, USFD: CLEAR)",
+      "failure_percentage": 6.7,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang C",
+      "submitted_at": "2026-09-21T08:22:40.355377",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-04152718",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0408",
+      "defect_category": "OHE Tension & Insulator Inspection",
+      "section_from": "TDL",
+      "section_to": "FZD",
+      "section_label": "TDL - FZD",
+      "line": "DN",
+      "km_start": 224.67,
+      "km_end": 226.15,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 156,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 36.6%, ATD: NORMAL)",
+      "failure_percentage": 9.7,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T08:22:40.606976",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-E5C671FD",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0443",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "KRJ",
+      "section_to": "KRJ",
+      "section_label": "KRJ Station Yard",
+      "line": "DN",
+      "km_start": 83.05,
+      "km_end": 83.15,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "Signal Maintainer Gang B",
+      "duration_requested_min": 150,
+      "priority": "CRITICAL",
+      "description": "Signal maintenance (POINT_MACHINE at KRJ, Tier: CRITICAL)",
+      "failure_percentage": 99.0,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang B",
+      "submitted_at": "2026-09-21T08:22:40.787697",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-02AD0819",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0535",
+      "defect_category": "Rail Flaw (USFD Under Observation)",
+      "section_from": "KRJ",
+      "section_to": "ALJN",
+      "section_label": "KRJ - ALJN",
+      "line": "DN",
+      "km_start": 121.25,
+      "km_end": 122.64,
+      "machine_required": "TAMPING",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang A",
+      "duration_requested_min": 197,
+      "priority": "CRITICAL",
+      "description": "Track maintenance (AVERAGE TGI 52.4, USFD: OBS)",
+      "failure_percentage": 99.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang A",
+      "submitted_at": "2026-09-21T08:53:47.550735",
+      "status": "APPROVED_FORWARDED",
+      "review_note": "Site evidence verified; forwarded to Central OCC for block sanction.",
+      "reviewed_at": "2026-09-21T10:34:30.265923",
+      "reviewed_by": "Department Officer"
+    },
+    {
+      "request_id": "WREQ-SIG-17026BCA",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0446",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "ETW",
+      "section_to": "ETW",
+      "section_label": "ETW Station Yard",
+      "line": "UP",
+      "km_start": 300.99,
+      "km_end": 301.09,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "S&T Field Technician",
+      "duration_requested_min": 150,
+      "priority": "LOW",
+      "description": "Signal maintenance (POINT_MACHINE at ETW, Tier: LOW)",
+      "failure_percentage": 2.9,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "S&T Field Technician",
+      "submitted_at": "2026-09-21T08:53:47.998981",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-19491E2A",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0202",
+      "defect_category": "Contact Wire Condemning Wear",
+      "section_from": "KRJ",
+      "section_to": "ALJN",
+      "section_label": "KRJ - ALJN",
+      "line": "DN",
+      "km_start": 117.33,
+      "km_end": 118.04,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 160,
+      "priority": "CRITICAL",
+      "description": "OHE maintenance (Wire wear 85.0%, ATD: NORMAL)",
+      "failure_percentage": 100.0,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T09:21:57.563858",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-8405DCB9",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0584",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "KRJ",
+      "section_to": "ALJN",
+      "section_label": "KRJ - ALJN",
+      "line": "UP",
+      "km_start": 86.46,
+      "km_end": 87.84,
+      "machine_required": "MANUAL",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "PWI Field Inspector",
+      "duration_requested_min": 180,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 69.1, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "PWI Field Inspector",
+      "submitted_at": "2026-09-21T09:56:51.610184",
+      "status": "APPROVED_FORWARDED",
+      "review_note": "Site evidence verified; forwarded to Central OCC for block sanction.",
+      "reviewed_at": "2026-09-21T10:33:24.755383",
+      "reviewed_by": "Department Officer"
+    },
+    {
+      "request_id": "WREQ-OHE-8DF121FE",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0321",
+      "defect_category": "Contact Wire Condemning Wear",
+      "section_from": "KRJ",
+      "section_to": "ALJN",
+      "section_label": "KRJ - ALJN",
+      "line": "UP",
+      "km_start": 91.28,
+      "km_end": 92.39,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 162,
+      "priority": "CRITICAL",
+      "description": "OHE maintenance (Wire wear 87.0%, ATD: NORMAL)",
+      "failure_percentage": 100.0,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T09:56:52.120247",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-40B55342",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0340",
+      "defect_category": "Track Circuit Fault",
+      "section_from": "TDL",
+      "section_to": "TDL",
+      "section_label": "TDL Station Yard",
+      "line": "UP",
+      "km_start": 208.64,
+      "km_end": 208.74,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "MEDIUM",
+      "description": "Signal maintenance (TRACK_CIRCUIT at TDL, Tier: MEDIUM)",
+      "failure_percentage": 38.7,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T09:56:52.425365",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-526AB915",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0068",
+      "defect_category": "Rail Flaw (USFD Under Observation)",
+      "section_from": "ETW",
+      "section_to": "PHD",
+      "section_label": "ETW - PHD",
+      "line": "DN",
+      "km_start": 319.74,
+      "km_end": 321.69,
+      "machine_required": "BCM",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang A",
+      "duration_requested_min": 243,
+      "priority": "HIGH",
+      "description": "Track maintenance (AVERAGE TGI 55.0, USFD: OBS)",
+      "failure_percentage": 61.7,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang A",
+      "submitted_at": "2026-09-21T10:41:25.719624",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-863EC5D4",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0095",
+      "defect_category": "Contact Wire Condemning Wear",
+      "section_from": "DER",
+      "section_to": "KRJ",
+      "section_label": "DER - KRJ",
+      "line": "UP",
+      "km_start": 77.09,
+      "km_end": 77.77,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 163,
+      "priority": "CRITICAL",
+      "description": "OHE maintenance (Wire wear 100.0%, ATD: NORMAL)",
+      "failure_percentage": 99.9,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T10:41:26.219120",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-6C8E6E37",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0331",
+      "defect_category": "Axle Counter Reset Failure",
+      "section_from": "FZD",
+      "section_to": "FZD",
+      "section_label": "FZD Station Yard",
+      "line": "DN",
+      "km_start": 227.17,
+      "km_end": 227.27,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "Signal Maintainer Gang B",
+      "duration_requested_min": 150,
+      "priority": "HIGH",
+      "description": "Signal maintenance (AXLE_COUNTER at FZD, Tier: HIGH)",
+      "failure_percentage": 51.0,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang B",
+      "submitted_at": "2026-09-21T10:41:26.607533",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-E7909CD7",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0583",
+      "defect_category": "Ballast Deficiency / Deep Screening",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "DN",
+      "km_start": 240.71,
+      "km_end": 242.23,
+      "machine_required": "BCM",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "PWI Field Inspector",
+      "duration_requested_min": 234,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 52.5, USFD: CLEAR)",
+      "failure_percentage": 5.1,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "PWI Field Inspector",
+      "submitted_at": "2026-09-21T11:18:55.349293",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-0113B4E2",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0085",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "NDLS",
+      "section_to": "GZB",
+      "section_label": "NDLS - GZB",
+      "line": "DN",
+      "km_start": 20.0,
+      "km_end": 21.43,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang A",
+      "duration_requested_min": 165,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 82.7%, ATD: NORMAL)",
+      "failure_percentage": 5.5,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang A",
+      "submitted_at": "2026-09-21T11:18:55.660973",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-296CE851",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0374",
+      "defect_category": "Electronic Interlocking Alarm",
+      "section_from": "PHD",
+      "section_to": "PHD",
+      "section_label": "PHD Station Yard",
+      "line": "UP",
+      "km_start": 358.17,
+      "km_end": 358.27,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "LOW",
+      "description": "Signal maintenance (EI_SYSTEM at PHD, Tier: LOW)",
+      "failure_percentage": 22.7,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T11:18:55.923538",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-173F2F35",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0347",
+      "defect_category": "OHE Tension & Insulator Inspection",
+      "section_from": "GZB",
+      "section_to": "DER",
+      "section_label": "GZB - DER",
+      "line": "DN",
+      "km_start": 30.98,
+      "km_end": 31.6,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 151,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 28.1%, ATD: NORMAL)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T11:46:03.816967",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-5D8DBF8B",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0188",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "GZB",
+      "section_to": "DER",
+      "section_label": "GZB - DER",
+      "line": "UP",
+      "km_start": 32.18,
+      "km_end": 33.03,
+      "machine_required": "MANUAL",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang C",
+      "duration_requested_min": 160,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 69.8, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang C",
+      "submitted_at": "2026-09-21T12:20:17.006893",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-B2DA2B2C",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0086",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "DER",
+      "section_to": "DER",
+      "section_label": "DER Station Yard",
+      "line": "DN",
+      "km_start": 37.32,
+      "km_end": 37.42,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "LOW",
+      "description": "Signal maintenance (POINT_MACHINE at DER, Tier: LOW)",
+      "failure_percentage": 15.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T12:20:17.485771",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-8FEE2A2C",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0018",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "TDL",
+      "section_to": "FZD",
+      "section_label": "TDL - FZD",
+      "line": "DN",
+      "km_start": 210.13,
+      "km_end": 210.99,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "PWI Field Inspector",
+      "duration_requested_min": 154,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 78.3, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "PWI Field Inspector",
+      "submitted_at": "2026-09-21T12:57:58.886490",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-48F1CF9E",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0375",
+      "defect_category": "OHE Tension & Insulator Inspection",
+      "section_from": "KRJ",
+      "section_to": "ALJN",
+      "section_label": "KRJ - ALJN",
+      "line": "DN",
+      "km_start": 92.2,
+      "km_end": 93.28,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 148,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 7.0%, ATD: NORMAL)",
+      "failure_percentage": 0.4,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T12:57:59.373302",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-8C5FD4B5",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0494",
+      "defect_category": "Rail Flaw (USFD Immediate)",
+      "section_from": "KRJ",
+      "section_to": "ALJN",
+      "section_label": "KRJ - ALJN",
+      "line": "UP",
+      "km_start": 123.54,
+      "km_end": 124.5,
+      "machine_required": "TAMPING",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang B",
+      "duration_requested_min": 203,
+      "priority": "CRITICAL",
+      "description": "Track maintenance (AVERAGE TGI 55.0, USFD: IMR)",
+      "failure_percentage": 82.5,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang B",
+      "submitted_at": "2026-09-21T13:50:05.158329",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-FEA5969E",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0511",
+      "defect_category": "OHE Tension & Insulator Inspection",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "UP",
+      "km_start": 286.15,
+      "km_end": 287.65,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "OHE Patrol Inspector",
+      "duration_requested_min": 152,
+      "priority": "HIGH",
+      "description": "OHE maintenance (Wire wear 31.3%, ATD: NORMAL)",
+      "failure_percentage": 73.1,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "OHE Patrol Inspector",
+      "submitted_at": "2026-09-21T13:50:05.640411",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-A573BF1E",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0389",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "NDLS",
+      "section_to": "NDLS",
+      "section_label": "NDLS Station Yard",
+      "line": "UP",
+      "km_start": 0.0,
+      "km_end": 0.1,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "S&T Field Technician",
+      "duration_requested_min": 150,
+      "priority": "CRITICAL",
+      "description": "Signal maintenance (POINT_MACHINE at NDLS, Tier: CRITICAL)",
+      "failure_percentage": 99.8,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "S&T Field Technician",
+      "submitted_at": "2026-09-21T13:50:06.122093",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-5DD06EC9",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0187",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "DN",
+      "km_start": 274.31,
+      "km_end": 276.13,
+      "machine_required": "TAMPING",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang C",
+      "duration_requested_min": 187,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 57.4, USFD: CLEAR)",
+      "failure_percentage": 0.6,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang C",
+      "submitted_at": "2026-09-21T14:19:46.622810",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-E7660975",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0144",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "FZD",
+      "section_to": "FZD",
+      "section_label": "FZD Station Yard",
+      "line": "UP",
+      "km_start": 225.9,
+      "km_end": 226.0,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "CRITICAL",
+      "description": "Signal maintenance (POINT_MACHINE at FZD, Tier: CRITICAL)",
+      "failure_percentage": 99.8,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T14:19:47.108173",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-0839B227",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0499",
+      "defect_category": "Rail Flaw (USFD Immediate)",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "UP",
+      "km_start": 242.47,
+      "km_end": 243.98,
+      "machine_required": "BCM",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang C",
+      "duration_requested_min": 241,
+      "priority": "CRITICAL",
+      "description": "Track maintenance (AVERAGE TGI 51.7, USFD: IMR)",
+      "failure_percentage": 92.8,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang C",
+      "submitted_at": "2026-09-21T15:10:34.520969",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-4254BA7E",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0532",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "NDLS",
+      "section_to": "GZB",
+      "section_label": "NDLS - GZB",
+      "line": "DN",
+      "km_start": 8.79,
+      "km_end": 10.21,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 160,
+      "priority": "CRITICAL",
+      "description": "OHE maintenance (Wire wear 65.7%, ATD: NORMAL)",
+      "failure_percentage": 98.4,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T15:10:34.962425",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-AD3E930E",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0287",
+      "defect_category": "Electronic Interlocking Alarm",
+      "section_from": "KRJ",
+      "section_to": "KRJ",
+      "section_label": "KRJ Station Yard",
+      "line": "UP",
+      "km_start": 82.74,
+      "km_end": 82.84,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang B",
+      "duration_requested_min": 150,
+      "priority": "MEDIUM",
+      "description": "Signal maintenance (EI_SYSTEM at KRJ, Tier: MEDIUM)",
+      "failure_percentage": 30.6,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang B",
+      "submitted_at": "2026-09-21T15:10:35.443535",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-89EC8B1C",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0127",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "DER",
+      "section_to": "KRJ",
+      "section_label": "DER - KRJ",
+      "line": "DN",
+      "km_start": 56.79,
+      "km_end": 57.99,
+      "machine_required": "TAMPING",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang C",
+      "duration_requested_min": 181,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 69.0, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang C",
+      "submitted_at": "2026-09-21T16:02:32.341290",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-CD5A9B05",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0464",
+      "defect_category": "OHE Tension & Insulator Inspection",
+      "section_from": "FZD",
+      "section_to": "ETW",
+      "section_label": "FZD - ETW",
+      "line": "UP",
+      "km_start": 248.12,
+      "km_end": 249.14,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "OHE Patrol Inspector",
+      "duration_requested_min": 151,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 31.1%, ATD: NORMAL)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "OHE Patrol Inspector",
+      "submitted_at": "2026-09-21T16:02:32.767544",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-CF6F5C2C",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0302",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "GZB",
+      "section_to": "GZB",
+      "section_label": "GZB Station Yard",
+      "line": "UP",
+      "km_start": 25.81,
+      "km_end": 25.91,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "CRITICAL",
+      "description": "Signal maintenance (POINT_MACHINE at GZB, Tier: CRITICAL)",
+      "failure_percentage": 100.0,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T16:02:33.144817",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-54CA03FF",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0161",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "GZB",
+      "section_to": "DER",
+      "section_label": "GZB - DER",
+      "line": "DN",
+      "km_start": 28.4,
+      "km_end": 30.4,
+      "machine_required": "MANUAL",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "PWI Field Inspector",
+      "duration_requested_min": 179,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 65.0, USFD: CLEAR)",
+      "failure_percentage": 0.3,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "PWI Field Inspector",
+      "submitted_at": "2026-09-21T16:38:02.150898",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-C08C2695",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0213",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "PHD",
+      "section_to": "CNB",
+      "section_label": "PHD - CNB",
+      "line": "UP",
+      "km_start": 382.71,
+      "km_end": 383.64,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang A",
+      "duration_requested_min": 157,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 53.4%, ATD: NORMAL)",
+      "failure_percentage": 0.4,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang A",
+      "submitted_at": "2026-09-21T17:09:07.272015",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-7F591095",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0325",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "PHD",
+      "section_to": "PHD",
+      "section_label": "PHD Station Yard",
+      "line": "UP",
+      "km_start": 358.26,
+      "km_end": 358.36,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang A",
+      "duration_requested_min": 150,
+      "priority": "LOW",
+      "description": "Signal maintenance (POINT_MACHINE at PHD, Tier: LOW)",
+      "failure_percentage": 0.8,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang A",
+      "submitted_at": "2026-09-21T17:09:08.296738",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-2F4CB12F",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0260",
+      "defect_category": "Routine Track Patrol Observation",
+      "section_from": "ETW",
+      "section_to": "PHD",
+      "section_label": "ETW - PHD",
+      "line": "UP",
+      "km_start": 344.36,
+      "km_end": 346.2,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang B",
+      "duration_requested_min": 154,
+      "priority": "LOW",
+      "description": "Track maintenance (GOOD TGI 83.6, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang B",
+      "submitted_at": "2026-09-21T17:59:00.522003",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-08FB4FCF",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0187",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "GZB",
+      "section_to": "DER",
+      "section_label": "GZB - DER",
+      "line": "UP",
+      "km_start": 26.55,
+      "km_end": 27.99,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang B",
+      "duration_requested_min": 163,
+      "priority": "CRITICAL",
+      "description": "OHE maintenance (Wire wear 75.9%, ATD: NORMAL)",
+      "failure_percentage": 99.9,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang B",
+      "submitted_at": "2026-09-21T17:59:01.002903",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-29D39878",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0177",
+      "defect_category": "Track Circuit Fault",
+      "section_from": "TDL",
+      "section_to": "TDL",
+      "section_label": "TDL Station Yard",
+      "line": "UP",
+      "km_start": 210.44,
+      "km_end": 210.54,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Signal Maintainer Gang B",
+      "duration_requested_min": 150,
+      "priority": "LOW",
+      "description": "Signal maintenance (TRACK_CIRCUIT at TDL, Tier: LOW)",
+      "failure_percentage": 24.9,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang B",
+      "submitted_at": "2026-09-21T17:59:01.385231",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-EFABAD31",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0269",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "TDL",
+      "section_to": "FZD",
+      "section_label": "TDL - FZD",
+      "line": "UP",
+      "km_start": 216.02,
+      "km_end": 216.64,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang A",
+      "duration_requested_min": 162,
+      "priority": "CRITICAL",
+      "description": "OHE maintenance (Wire wear 70.7%, ATD: NORMAL)",
+      "failure_percentage": 99.4,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/ohe/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang A",
+      "submitted_at": "2026-09-21T18:34:35.198650",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-05D1D065",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0180",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "PHD",
+      "section_to": "CNB",
+      "section_label": "PHD - CNB",
+      "line": "UP",
+      "km_start": 420.55,
+      "km_end": 422.43,
+      "machine_required": "TAMPING",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang B",
+      "duration_requested_min": 189,
+      "priority": "MEDIUM",
+      "description": "Track maintenance (AVERAGE TGI 57.2, USFD: CLEAR)",
+      "failure_percentage": 30.7,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang B",
+      "submitted_at": "2026-09-21T19:27:01.928577",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-7B3D6FCF",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0523",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "ETW",
+      "section_to": "PHD",
+      "section_label": "ETW - PHD",
+      "line": "DN",
+      "km_start": 325.36,
+      "km_end": 326.52,
+      "machine_required": "TOWER_WAGON",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang A",
+      "duration_requested_min": 161,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 72.7%, ATD: NORMAL)",
+      "failure_percentage": 3.1,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang A",
+      "submitted_at": "2026-09-21T19:27:02.401295",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-3E7DA18D",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0047",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "NDLS",
+      "section_to": "NDLS",
+      "section_label": "NDLS Station Yard",
+      "line": "DN",
+      "km_start": 0.0,
+      "km_end": 0.1,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "S&T Field Technician",
+      "duration_requested_min": 150,
+      "priority": "MEDIUM",
+      "description": "Signal maintenance (POINT_MACHINE at NDLS, Tier: MEDIUM)",
+      "failure_percentage": 43.3,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/signal/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "S&T Field Technician",
+      "submitted_at": "2026-09-21T19:27:02.845936",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-0DE280F2",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0743",
+      "defect_category": "Track Geometry Attention (TGI)",
+      "section_from": "TDL",
+      "section_to": "FZD",
+      "section_label": "TDL - FZD",
+      "line": "UP",
+      "km_start": 215.19,
+      "km_end": 216.95,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang C",
+      "duration_requested_min": 158,
+      "priority": "LOW",
+      "description": "Track maintenance (AVERAGE TGI 76.6, USFD: CLEAR)",
+      "failure_percentage": 0.1,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang C",
+      "submitted_at": "2026-09-21T19:58:47.186718",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-TRK-65CFD8C7",
+      "department": "ENGINEERING_TRACK",
+      "department_label": "Civil / Track (TMS)",
+      "asset_id": "TRK-0803",
+      "defect_category": "Routine Track Patrol Observation",
+      "section_from": "PHD",
+      "section_to": "CNB",
+      "section_label": "PHD - CNB",
+      "line": "UP",
+      "km_start": 409.53,
+      "km_end": 410.38,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": false,
+      "gang_crew": "Track Patrol Gang B",
+      "duration_requested_min": 153,
+      "priority": "LOW",
+      "description": "Track maintenance (GOOD TGI 81.9, USFD: CLEAR)",
+      "failure_percentage": 0.2,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/track/site_photo_2.png"
+        },
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/track/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/track/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Track Patrol Gang B",
+      "submitted_at": "2026-09-21T20:28:33.264503",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-OHE-71DA9DEA",
+      "department": "TRACTION_DISTRIBUTION_OHE",
+      "department_label": "Electrical / OHE (TDMS)",
+      "asset_id": "OHE-0294",
+      "defect_category": "Contact Wire Wear",
+      "section_from": "NDLS",
+      "section_to": "GZB",
+      "section_label": "NDLS - GZB",
+      "line": "UP",
+      "km_start": 1.82,
+      "km_end": 2.49,
+      "machine_required": "NONE",
+      "power_block_required": true,
+      "disconnection_required": false,
+      "gang_crew": "TRD Linemen Gang A",
+      "duration_requested_min": 158,
+      "priority": "LOW",
+      "description": "OHE maintenance (Wire wear 59.4%, ATD: NORMAL)",
+      "failure_percentage": 0.3,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_2.png",
+          "url": "/attachments/ohe/site_photo_2.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/ohe/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "TRD Linemen Gang A",
+      "submitted_at": "2026-09-21T20:28:33.703213",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    },
+    {
+      "request_id": "WREQ-SIG-F6B12085",
+      "department": "SIGNAL_AND_TELECOM",
+      "department_label": "Signalling & Telecom (SMMS)",
+      "asset_id": "SIG-0036",
+      "defect_category": "Point Machine Sluggish",
+      "section_from": "NDLS",
+      "section_to": "NDLS",
+      "section_label": "NDLS Station Yard",
+      "line": "UP",
+      "km_start": 1.33,
+      "km_end": 1.43,
+      "machine_required": "NONE",
+      "power_block_required": false,
+      "disconnection_required": true,
+      "gang_crew": "Signal Maintainer Gang B",
+      "duration_requested_min": 150,
+      "priority": "LOW",
+      "description": "Signal maintenance (POINT_MACHINE at NDLS, Tier: LOW)",
+      "failure_percentage": 12.6,
+      "attachments": [
+        {
+          "type": "image",
+          "filename": "site_photo_1.png",
+          "url": "/attachments/signal/site_photo_1.png"
+        },
+        {
+          "type": "pdf",
+          "filename": "inspection_report.pdf",
+          "url": "/attachments/signal/inspection_report.pdf"
+        }
+      ],
+      "submitted_by": "Signal Maintainer Gang B",
+      "submitted_at": "2026-09-21T20:28:34.055767",
+      "status": "PENDING_REVIEW",
+      "review_note": null,
+      "reviewed_at": null,
+      "reviewed_by": null
+    }
+  ]
+}

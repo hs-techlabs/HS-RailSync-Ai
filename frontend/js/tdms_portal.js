@@ -7,7 +7,7 @@
  * 25 kV power-permit column, and the power block sanction memo.
  */
 
-const API_BASE = "";
+const API_BASE = (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
 
 document.addEventListener("DOMContentLoaded", () => {
     initSimClock("tdms-sim-clock");

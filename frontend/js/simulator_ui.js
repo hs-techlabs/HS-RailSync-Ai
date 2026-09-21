@@ -4,6 +4,8 @@
  * and 1-Click Judge Demo presets.
  */
 
+const API_BASE = (typeof window !== "undefined" && window.API_BASE !== undefined) ? window.API_BASE : "";
+
 function openSimulatorModal() {
     if (typeof gisMap !== "undefined" && gisMap) {
         gisMap.closePopup();
