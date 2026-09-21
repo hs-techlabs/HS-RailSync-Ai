@@ -16,7 +16,7 @@ export async function onRequest(context) {
     const url = new URL(request.url);
 
     // Get backend base URL from Cloudflare environment variable or fallback
-    const backendBase = env.BACKEND_URL || "http://127.0.0.1:8000";
+    const backendBase = env.BACKEND_URL || "http://13.233.15.38:8000";
     const cleanBackend = backendBase.replace(/\/+$/, "");
 
     // Build target destination URL
