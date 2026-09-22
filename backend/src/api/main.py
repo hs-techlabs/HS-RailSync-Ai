@@ -63,6 +63,15 @@ possible_frontend_dirs = [
 frontend_dir = next((d for d in possible_frontend_dirs if os.path.exists(d)), None)
 if frontend_dir and os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
+    css_dir = os.path.join(frontend_dir, "css")
+    js_dir = os.path.join(frontend_dir, "js")
+    uikit_dir = os.path.join(frontend_dir, "ui-kit")
+    if os.path.exists(css_dir):
+        app.mount("/css", StaticFiles(directory=css_dir), name="css")
+    if os.path.exists(js_dir):
+        app.mount("/js", StaticFiles(directory=js_dir), name="js")
+    if os.path.exists(uikit_dir):
+        app.mount("/ui-kit", StaticFiles(directory=uikit_dir), name="ui-kit")
 
 # Field-evidence attachments (photos / inspection PDFs referenced by worker
 # reports). Nothing under data/ was web-servable before this.
@@ -115,6 +124,15 @@ def serve_dashboard():
             "topology": "/api/corridor/topology"
         }
     })
+
+
+@app.get("/config.js")
+def serve_config():
+    if frontend_dir:
+        cfg = os.path.join(frontend_dir, "config.js")
+        if os.path.exists(cfg):
+            return FileResponse(cfg, media_type="application/javascript")
+    return HTMLResponse("window.API_BASE = window.API_BASE || '';", media_type="application/javascript")
 
 
 @app.get("/api/corridor/topology")
